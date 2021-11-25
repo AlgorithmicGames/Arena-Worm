@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>AI-Tournaments interface template</title>
+		<meta content="width=device-width, initial-scale=1.0" name="viewport">
+		<meta content="yes" name="mobile-web-app-capable">
+		<script>
+			'use strict'
+			function a(){
+				let _init;
+				window.addEventListener('message', messageEvent => {
+					if(messageEvent.data.type === 'Post'){
+						window.opener.postMessage('YOUR_RESPONSE', '*');
+					}else if(!_init){
+						_init = messageEvent.data;
+					}
+				});
+				if(window.opener){
+					window.opener.postMessage(null, '*');
+				}
+			}
+		</script>
+	</head>
+	<body onload="a()">
+	</body>
+</html>
