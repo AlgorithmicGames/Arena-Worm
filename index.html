@@ -2,16 +2,269 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
-		<title>AI-Tournaments interface template</title>
+		<title>Human interface for Worm</title>
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-TJFMG29186"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-TJFMG29186');</script>
 		<meta content="width=device-width, initial-scale=1.0" name="viewport">
 		<meta content="yes" name="mobile-web-app-capable">
+		<style>
+			:root {
+				--square-size: 20px;
+			}
+			html, body {
+				height: 100%;
+				margin-top: 0;
+				margin-bottom: 0;
+			}
+			body {
+				height: 100%;
+				display: grid;
+				text-align: center;
+				grid-template-rows: auto min-content;
+			}
+
+			#score-board-outer-wrapper {
+				height: 100%;
+				width: 100%;
+				top: 0;
+				color: chartreuse;
+				position: fixed;
+				left: 0;
+			}
+			#score-board-inner-wrapper {
+				display: flex;
+				height: 100%;
+				justify-content: center;
+				align-items: center;
+			}
+			#score-board{
+				border: 1px solid black;
+				background-color: rgba(0,0,0,.9);
+				border-radius: 25px;
+				padding: 15px;
+				text-align: left;
+			}
+			#score-board tr>th:not(:first-child), #score-board tr>td:not(:first-child) {
+				padding-left: 1em;
+			}
+
+			#gameboard {
+				cursor: default;
+				user-select: none;
+				display: inline-block;
+			}
+
+			#controller {
+				width: 100%;
+				display: flex;
+				position: relative;
+				margin-bottom: 8px;
+			}
+			#slider, #slider-layer {
+				width: -webkit-fill-available;
+			}
+
+			.layer {
+				display: grid;
+				background-color: #ffffff07;
+				border-width: 0.5px;
+				border-style: solid;
+				border-color: rgba(0, 0, 0, .2);
+				width: fit-content;
+			}
+			.layer {
+				border-color: rgba(255, 255, 255, .2);
+			}
+			.layer:last-child, .gameboard-wall {
+				background-color: whitesmoke;
+			}
+			.gameboard-wall {
+				opacity: 0.5;
+				position: absolute;
+				backface-visibility: hidden;
+			}
+
+			.space {
+				border-width: 0.5px;
+				border-style: solid;
+				border-color: rgba(0, 0, 0, .2);
+				text-align: center;
+				width: var(--square-size);
+				height: var(--square-size);
+			}
+
+			.space-content:not(.eatable) {
+				height: 0;
+			}
+			.eatable {
+				border-radius: 50%;
+				background-color: lightgreen;
+			}
+			.type-Wall>.eatable {
+				display: none;
+			}
+
+			.type-SolidWorm {
+				font-weight: bold;
+			}
+
+			.type-Wall {
+				background-color: #0000007f;
+			}
+			.type-Grave {
+				filter: grayscale(100%);
+			}
+			.defeatedWorms_Solid .type-Grave {
+				filter: unset;
+			}
+
+			#gameboard.threeDimensions {
+				perspective: 100vmax;
+			}
+			#gameboard.threeDimensions>* {
+				transform-style: preserve-3d;
+			}
+		</style>
 		<script>
 			'use strict'
 			function a(){
+				function rotateArray(array){
+					let result = [];
+					for(let i = array[0].length-1; 0 <= i; i--){
+						let row = array.map(e => e[i]);
+						result.push(row);
+					}
+					return result;
+				}
 				let _init;
+				let layerWrapper = document.getElementById('layer-wrapper');
 				window.addEventListener('message', messageEvent => {
 					if(messageEvent.data.type === 'Post'){
-						window.opener.postMessage('YOUR_RESPONSE', '*');
+						if(_init.settings.arena.threeDimensions){
+							['north', 'south', 'east', 'west'].forEach(side => {
+								let wall = document.createElement('div');
+								wall.id = 'gameboard-wall-'+side;
+								wall.classList.add('gameboard-wall');
+								layerWrapper.appendChild(wall);
+							});
+						}
+						messageEvent.data.message.reverse().forEach(srcLayer => {
+							while(layerWrapper.firstChild){
+								layerWrapper.removeChild(layerWrapper.lastChild);
+							}
+							let layer = document.createElement('div');
+							layer.classList.add('layer');
+							if(_init.settings.rules.defeatedWorms === 'Solid'){
+								layer.classList.add('defeatedWorms_Solid');
+							}
+							layerWrapper.appendChild(layer);
+							let gridTemplateColumns = '';
+							rotateArray(srcLayer).forEach((srcColumn, columIndex) => {
+								gridTemplateColumns += 'auto ';
+								srcColumn.forEach((spaceData, rowIndex) => {
+									let space = document.createElement('div');
+									space.classList.add('space');
+									if(rowIndex === 0){
+										space.classList.add('space-border-left');
+									}
+									if(columIndex === _init.settings.arena.size-1){
+										space.classList.add('space-border-bottom');
+									}
+									spaceData.grave.forEach(part => {
+										let spaceContent = document.createElement('div');
+										spaceContent.classList.add('space-content');
+										spaceContent.classList.add('type-Grave');
+										spaceContent.classList.add('type-'+part.type);
+										spaceContent.innerHTML = part.team;
+										spaceContent.style.color = 'orange'; // replay.arenaResult.teams[part.team].color.RGB;
+										space.appendChild(spaceContent);
+									});
+									if(spaceData.occupiedBy !== null){
+										space.classList.add('type-'+spaceData.occupiedBy.type);
+										if(spaceData.occupiedBy.type !== 'Wall'){
+											let spaceContent = document.createElement('div');
+											spaceContent.classList.add('space-content');
+											spaceContent.innerHTML = spaceData.occupiedBy.team;
+											spaceContent.classList.add('worm');
+											spaceContent.style.color = 'blue'; // replay.arenaResult.teams[spaceData.occupiedBy.team].color.RGB;
+											space.appendChild(spaceContent);
+										}
+									}
+									if(spaceData.eatables.apple || 0 < spaceData.eatables.other){
+										let spaceContent = document.createElement('div');
+										spaceContent.classList.add('space-content');
+										spaceContent.classList.add('eatable');
+										if(spaceData.eatables.apple){
+											spaceContent.innerHTML = '🍎';
+										}else{
+											spaceContent.innerHTML = spaceData.eatables.other;
+											spaceContent.style.fontStyle = 'italic';
+										}
+										space.appendChild(spaceContent);
+									}
+									layer.appendChild(space);
+								});
+							});
+							layer.style.gridTemplateColumns = gridTemplateColumns.trim();
+						});
+						(()=>{
+							let lastSize = null;
+							function place(){
+								let layers = layerWrapper.getElementsByClassName('layer');
+								let size = layers[0].offsetHeight;
+								if(size !== lastSize && 0 < size){
+									lastSize = size;
+									[...layers].forEach((layer, index) => {
+										if(0 < index){
+											layer.style.marginTop = -size+'px';
+										}
+										let translate = -(size/(_init.settings.arena.size-1))*index;
+										translate += size/2;
+										layer.style.transform = 'translateZ('+translate+'px)';
+									});
+									if(_init.settings.arena.threeDimensions){
+										let translate = -size/2;
+										[
+											{
+												side: 'north',
+												style: [
+													{key: 'height', value: size+'px'},
+													{key: 'width', value: size+'px'},
+													{key: 'transform', value: 'rotateX(-90deg) translateZ('+translate+'px)'}
+												]
+											},{
+												side: 'south',
+												style: [
+													{key: 'height', value: size+'px'},
+													{key: 'width', value: size+'px'},
+													{key: 'transform', value: 'rotateX(90deg) translateZ('+translate+'px)'}
+												]
+											},{
+												side: 'east',
+												style: [
+													{key: 'height', value: size+'px'},
+													{key: 'width', value: size+'px'},
+													{key: 'transform', value: 'rotateX(90deg) rotateY(-90deg) translateZ('+translate+'px)'}
+												]
+											},{
+												side: 'west',
+												style: [
+													{key: 'height', value: size+'px'},
+													{key: 'width', value: size+'px'},
+													{key: 'transform', value: 'rotateX(90deg) rotateY(90deg) translateZ('+translate+'px)'}
+												]
+											}
+										].forEach(w => {
+											let wall = document.getElementById('gameboard-wall-'+w.side);
+											w.style.forEach(style => {
+												wall.style[style.key] = style.value;
+											});
+										});
+									}
+								}
+								requestAnimationFrame(place);
+							}
+							place();
+						})();
 					}else if(!_init){
 						_init = messageEvent.data;
 					}
@@ -20,8 +273,51 @@
 					window.opener.postMessage(null, '*');
 				}
 			}
+			function buttonPressed(direction){
+				window.opener.postMessage(direction.split(' ')[0], '*');
+			}
+			document.addEventListener('keydown', keyboardEvent => {
+				switch(keyboardEvent.key){
+					case 'w':
+					case 'ArrowUp':
+						buttonPressed('y+');
+						break;
+					case 's':
+					case 'ArrowDown':
+						buttonPressed('y-');
+						break;
+					case 'd':
+					case 'ArrowRight':
+						buttonPressed('x+');
+						break;
+					case 'a':
+					case 'ArrowLeft':
+						buttonPressed('x-');
+						break;
+					case 'q':
+						if(_init.settings.arena.threeDimensions){
+							buttonPressed('z+');
+						}
+						break;
+					case 'z':
+					case 'e':
+						if(_init.settings.arena.threeDimensions){
+							buttonPressed('z-');
+						}
+						break;
+				}
+			});
 		</script>
 	</head>
 	<body onload="a()">
+		<div id="layer-wrapper"></div>
+		<div>
+			<button onclick="buttonPressed(this.innerHTML)">x+ (D or right arrow)</button>
+			<button onclick="buttonPressed(this.innerHTML)">x- (A or left arrow)</button>
+			<button onclick="buttonPressed(this.innerHTML)">y+ (W or up arrow)</button>
+			<button onclick="buttonPressed(this.innerHTML)">y- (S or down arrow)</button>
+			<button onclick="buttonPressed(this.innerHTML)">z+ (Q)</button>
+			<button onclick="buttonPressed(this.innerHTML)">z- (E or Z)</button>
+		</div>
 	</body>
 </html>
