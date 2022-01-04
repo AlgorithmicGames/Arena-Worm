@@ -126,6 +126,7 @@
 		</style>
 		<script>
 			'use strict'
+			let awaitingResponse;
 			function a(){
 				function rotateArray(array){
 					let result = [];
@@ -139,6 +140,7 @@
 				let layerWrapper = document.getElementById('layer-wrapper');
 				window.addEventListener('message', messageEvent => {
 					if(messageEvent.data.type === 'Post'){
+						awaitingResponse = true;
 						if(_init.settings.arena.threeDimensions){
 							['north', 'south', 'east', 'west'].forEach(side => {
 								let wall = document.createElement('div');
@@ -274,7 +276,10 @@
 				}
 			}
 			function buttonPressed(direction){
-				window.opener.postMessage(direction.split(' ')[0], '*');
+				if(awaitingResponse){
+					awaitingResponse = false;
+					window.opener.postMessage(direction.split(' ')[0], '*');
+				}
 			}
 			document.addEventListener('keydown', keyboardEvent => {
 				switch(keyboardEvent.key){
