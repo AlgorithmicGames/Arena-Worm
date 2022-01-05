@@ -123,11 +123,28 @@
 			#gameboard.threeDimensions>* {
 				transform-style: preserve-3d;
 			}
+			#lock {
+				display: none;
+			}
+			#lock.engaged {
+				background: rgba(128, 128, 128, .5);
+				justify-content: center;
+				font-size: xxx-large;
+				align-items: center;
+				position: absolute;
+				display: flex;
+				z-index: 9999;
+				height: 100%;
+				width: 100%;
+				right: 0;
+				top: 0;
+			}
 		</style>
 		<script>
 			'use strict'
-			let awaitingResponse;
+			let responseLock;
 			function a(){
+				responseLock = document.getElementById('lock');
 				function rotateArray(array){
 					let result = [];
 					for(let i = array[0].length-1; 0 <= i; i--){
@@ -140,7 +157,7 @@
 				let layerWrapper = document.getElementById('layer-wrapper');
 				window.addEventListener('message', messageEvent => {
 					if(messageEvent.data.type === 'Post'){
-						awaitingResponse = true;
+						responseLock.classList.remove('engaged');
 						if(_init.settings.arena.threeDimensions){
 							['north', 'south', 'east', 'west'].forEach(side => {
 								let wall = document.createElement('div');
@@ -276,8 +293,8 @@
 				}
 			}
 			function buttonPressed(direction){
-				if(awaitingResponse){
-					awaitingResponse = false;
+				if(!responseLock.classList.contains('engaged')){
+					responseLock.classList.add('engaged');
 					window.opener.postMessage(direction.split(' ')[0], '*');
 				}
 			}
@@ -315,6 +332,7 @@
 		</script>
 	</head>
 	<body onload="a()">
+		<div id="lock" class="engaged"><span>Awaiting update</span></div>
 		<div id="layer-wrapper"></div>
 		<div>
 			<button onclick="buttonPressed(this.innerHTML)">x+ (D or right arrow)</button>
