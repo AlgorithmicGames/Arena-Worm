@@ -288,9 +288,7 @@
 						_init = messageEvent.data;
 					}
 				});
-				if(window.opener){
-					window.opener.postMessage(null, '*');
-				}
+				window.opener.postMessage(null, '*');
 			}
 			function buttonPressed(direction){
 				if(!responseLock.classList.contains('engaged')){
