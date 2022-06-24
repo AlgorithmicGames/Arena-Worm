@@ -293,7 +293,7 @@
 			function buttonPressed(direction){
 				if(!responseLock.classList.contains('engaged')){
 					responseLock.classList.add('engaged');
-					window.opener.postMessage(direction.split(' ')[0], '*');
+					window.opener.postMessage({value: getValue(direction.split(' ')[0])}, '*');
 				}
 			}
 			document.addEventListener('keydown', keyboardEvent => {
