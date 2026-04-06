@@ -34,6 +34,7 @@ function a() {
 			let scoreBoardString = ''
 			let matchLogErrors = replay.arenaResult.match.filter((l) => l.error)
 			if (matchLogErrors.length) {
+				scoreBoard.parentElement.parentElement.style.display = ''
 				scoreBoardString = '<b style="color: red">Aborted</b><br>'
 				matchLogErrors.forEach((matchLogError) =>
 					scoreBoardString += '<div style="color: white">Match ' + (replay.arenaResult.match.findIndex((l) => l === matchLogError) + 1) + ': ' +
@@ -71,6 +72,8 @@ function a() {
 			scoreBoardString += dataRows.sort((s1, s2) => s2[1] - s1[1]).map((s) => s[0]).join('') + '</table>'
 			scoreBoard.innerHTML = scoreBoardString
 		}
+
+		void replay.onAbort.then(() => rebuildScoreboard())
 
 		async function pullGameplayTicks() {
 			if (!activeMatchLog) return

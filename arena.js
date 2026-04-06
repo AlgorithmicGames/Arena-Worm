@@ -1,14 +1,13 @@
 'use strict'
+const _worms = []
 let _arena
 let _coordinate_end
 let _coordinate_middle
 let _participants
 let _settings
 let _shrinkOnTick
-let _tick = 0
 let _ticksSinceShrink = 0
 let _shrinks = 0
-let _worms = []
 let _worms_lastLength
 let _participantPromises
 class Direction {
@@ -690,7 +689,6 @@ function tick() {
 			ArenaHelper.postDone()
 		}
 	})
-	_tick++
 }
 function rotateArray(array) {
 	let result = []
