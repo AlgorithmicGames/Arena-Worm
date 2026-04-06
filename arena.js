@@ -188,7 +188,7 @@ class Space {
 			if (CHALLENGERS.length === 1) {
 				CHALLENGERS.forEach((solidWorm) => {
 					if (_settings.rules.winner === 'MostPoints') {
-						_participants.addScore(solidWorm.TEAM, eatables)
+						solidWorm.getParticipant().addScore(eatables)
 					}
 					while (0 < eatables) {
 						eatables--
@@ -650,7 +650,7 @@ function tick() {
 		})
 		if (_settings.rules.winner === 'LastWormStanding' && _worms_lastLength !== _worms.length) {
 			_worms.forEach((solidWorm) => {
-				_participants.addScore(solidWorm.TEAM, 1)
+				solidWorm.getParticipant().addScore(1)
 			})
 		}
 		_worms_lastLength = _worms.length
@@ -681,7 +681,7 @@ function tick() {
 					if (lastScore === s.score && lastLength != s.wormLength) {
 						bonusPoint++
 					}
-					s.participant.addScore(bonusPoint)
+					s.participant.addBonusScore(bonusPoint)
 					lastScore = s.score
 					lastLength = s.wormLength
 				})
