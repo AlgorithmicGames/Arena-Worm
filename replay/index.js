@@ -90,6 +90,10 @@ function a() {
 		}
 
 		window.onresize = () => {
+			if (gameboard.offsetWidth === 0) {
+				setTimeout(window.onresize, 100)
+				return
+			}
 			gameboard.parentElement.style.margin = ''
 			gameboard.style.zoom = 1
 			let bodyMargin = parseFloat(window.getComputedStyle(document.body, null).getPropertyValue('margin-top')) +
@@ -173,12 +177,17 @@ function a() {
 				matchCompleted = true
 				await pullGameplayTicks()
 				rebuildScoreboard()
-				setTick(slider.valueAsNumber)
 			})
 
-			tickPollTimer = setInterval(() => {
-				void pullGameplayTicks().then(() => setTick(slider.valueAsNumber))
-			}, 200)
+			function repeat() {
+				pullGameplayTicks().then(() => {
+					if (matchCompleted) {
+						return
+					}
+					repeat()
+				})
+			}
+			repeat()
 		}
 
 		function startPlayback() {
