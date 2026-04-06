@@ -119,6 +119,7 @@ function a() {
 		}
 
 		selectMatches.onchange = () => {
+			setTick(0)
 			if (tickPollTimer !== null) {
 				clearInterval(tickPollTimer)
 				tickPollTimer = null
@@ -390,16 +391,6 @@ function a() {
 				buttonNext.click()
 			}
 		})
-		replay.onMatchStart(({ matchIndex }) => {
-			const opt = selectMatches.querySelector('option[data-index="' + matchIndex + '"]')
-			if (opt) {
-				opt.disabled = false
-			}
-			const sel = selectMatches.selectedOptions[0]
-			if (sel && parseInt(sel.dataset.index, 10) === matchIndex) {
-				selectMatches.dispatchEvent(new Event('change', { bubbles: true }))
-			}
-		})
 		for (let i = 0; i < bestOfCount; i++) {
 			let option = document.createElement('option')
 			selectMatches.appendChild(option)
@@ -409,11 +400,21 @@ function a() {
 		}
 		const matchArr = replay.arenaResult.match ?? []
 		for (let i = 0; i < Math.min(bestOfCount, matchArr.length); i++) {
-			const opt = selectMatches.querySelector('option[data-index="' + i + '"]')
+			const opt = selectMatches.options[i]
 			if (opt) {
 				opt.disabled = false
 			}
 		}
+		replay.addOnMatchStartListener(({ matchIndex }) => {
+			const opt = selectMatches.options[matchIndex]
+			if (opt) {
+				opt.disabled = false
+			}
+			const sel = selectMatches.selectedOptions[0]
+			if (sel && parseInt(sel.dataset.index, 10) === matchIndex) {
+				selectMatches.dispatchEvent(new Event('change', { bubbles: true }))
+			}
+		})
 		if (bestOfCount > 1 && selectMatches.options.length > 0) {
 			const first = selectMatches.options[0]
 			if (!first.disabled) {
