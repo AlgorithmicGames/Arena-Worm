@@ -29,6 +29,8 @@ function a() {
 		let threeDDocumentListenersAttached = false
 		let dragPos = null
 		let matchCompleted = false
+		const bestOfRaw = replay.arenaResult.settings?.general?.bestOf
+		const bestOfCount = Number.isFinite(Number(bestOfRaw)) && Number(bestOfRaw) >= 1 ? Math.floor(Number(bestOfRaw)) : 1
 
 		function rebuildScoreboard() {
 			let scoreBoardString = ''
@@ -107,7 +109,7 @@ function a() {
 			gameboard.style.zoom = zoom * (replay.arenaResult.settings.arena.threeDimensions ? .5 : .9)
 			gameboard.parentElement.style.margin = 'auto'
 		}
-		if (replay.arenaResult.match.length === 1) {
+		if (bestOfCount <= 1) {
 			selectMatches.style.display = 'none'
 		}
 
@@ -388,17 +390,34 @@ function a() {
 				buttonNext.click()
 			}
 		})
-		for (let i = 0; i < replay.arenaResult.settings.general.bestOf; i++) {
+		replay.onMatchStart(({ matchIndex }) => {
+			const opt = selectMatches.querySelector('option[data-index="' + matchIndex + '"]')
+			if (opt) {
+				opt.disabled = false
+			}
+			const sel = selectMatches.selectedOptions[0]
+			if (sel && parseInt(sel.dataset.index, 10) === matchIndex) {
+				selectMatches.dispatchEvent(new Event('change', { bubbles: true }))
+			}
+		})
+		for (let i = 0; i < bestOfCount; i++) {
 			let option = document.createElement('option')
 			selectMatches.appendChild(option)
 			option.innerHTML = 'Match ' + (i + 1)
 			option.disabled = true
-			option.dataset.index = i
-			if (i === 0) {
-				selectMatches.onchange()
+			option.dataset.index = String(i)
+		}
+		const matchArr = replay.arenaResult.match ?? []
+		for (let i = 0; i < Math.min(bestOfCount, matchArr.length); i++) {
+			const opt = selectMatches.querySelector('option[data-index="' + i + '"]')
+			if (opt) {
+				opt.disabled = false
 			}
-			if (replay.arenaResult.settings.general.bestOf === 1) {
-				selectMatches.style.disabled = 'none'
+		}
+		if (bestOfCount > 1 && selectMatches.options.length > 0) {
+			const first = selectMatches.options[0]
+			if (!first.disabled) {
+				selectMatches.dispatchEvent(new Event('change', { bubbles: true }))
 			}
 		}
 	})
