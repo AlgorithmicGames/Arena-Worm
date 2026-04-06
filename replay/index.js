@@ -388,17 +388,18 @@ function a() {
 				buttonNext.click()
 			}
 		})
-		replay.arenaResult.match.forEach((matchLog, index) => {
+		for (let i = 0; i < replay.arenaResult.settings.general.bestOf; i++) {
 			let option = document.createElement('option')
 			selectMatches.appendChild(option)
-			option.innerHTML = 'Match ' + (index + 1)
-			option.dataset.index = index
-			if (index === 0) {
+			option.innerHTML = 'Match ' + (i + 1)
+			option.disabled = true
+			option.dataset.index = i
+			if (i === 0) {
 				selectMatches.onchange()
 			}
-			if (replay.arenaResult.match.length === 1) {
+			if (replay.arenaResult.settings.general.bestOf === 1) {
 				selectMatches.style.disabled = 'none'
 			}
-		})
+		}
 	})
 }
