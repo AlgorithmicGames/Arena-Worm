@@ -266,7 +266,7 @@ function a() {
 								if (spaceData.occupiedBy.type !== 'Wall') {
 									let spaceContent = document.createElement('div')
 									spaceContent.classList.add('space-content')
-									spaceContent.innerHTML = spaceData.occupiedBy.team
+									spaceContent.innerHTML = spaceData.occupiedBy.team + 1
 									spaceContent.classList.add('worm')
 									spaceContent.style.color = replay.arenaResult.teams[spaceData.occupiedBy.team].color.RGB
 									space.appendChild(spaceContent)
