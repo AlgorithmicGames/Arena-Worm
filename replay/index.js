@@ -119,6 +119,7 @@ function a() {
 		}
 
 		selectMatches.onchange = () => {
+			slider.valueAsNumber = 0
 			setTick(0)
 			if (tickPollTimer !== null) {
 				clearInterval(tickPollTimer)
@@ -170,8 +171,6 @@ function a() {
 				slider_rotateZ.style.display = 'unset'
 				gameboard.classList.add('threeDimensions')
 			}
-
-			rebuildScoreboard()
 
 			void pullGameplayTicks().then(() => {
 				slider.valueAsNumber = 0
@@ -295,8 +294,8 @@ function a() {
 				;(() => {
 					let lastSize = null
 					function place() {
-						let layers = layerWrapper.getElementsByClassName('layer')
-						let size = layers[0].offsetHeight
+						const layers = layerWrapper.getElementsByClassName('layer')
+						const size = layers[0]?.offsetHeight
 						if (size !== lastSize && 0 < size) {
 							lastSize = size
 							;[...layers].forEach((layer, index) => {
@@ -308,7 +307,7 @@ function a() {
 								layer.style.transform = 'translateZ(' + translate + 'px)'
 							})
 							if (replay.arenaResult.settings.arena.threeDimensions) {
-								let translate = -size / 2
+								const translate = -size / 2
 								;[
 									{
 										side: 'north',
