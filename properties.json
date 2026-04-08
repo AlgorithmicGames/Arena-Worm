@@ -1,9 +1,9 @@
 {
 	"header": {
 		"limits": {
-			"participants": {"min": 2, "max": 6},
-			"teams": {"min": 2, "max": 6},
-			"participantsPerTeam": {"min": 1, "max": 1}
+			"participants": { "min": 2, "max": 6 },
+			"teams": { "min": 2, "max": 6 },
+			"participantsPerTeam": { "min": 1, "max": 1 }
 		},
 		"replay": "/Arena-Worm/replay/"
 	},
@@ -12,7 +12,7 @@
 			"size": 15,
 			"threeDimensions": false,
 			"_meta": {
-				"size": {"min": 5, "max": null, "step": 2}
+				"size": { "min": 5, "max": null, "step": 2 }
 			}
 		},
 		"border": {
@@ -20,9 +20,9 @@
 			"movesPerArenaShrink": 0,
 			"shrinkMode": ["RandomPlacedWall_single", "RandomPlacedWall_fourSymmetry", "RandomPlacedWall_perWorm", "WallOuterArea"],
 			"_meta": {
-				"noOuterBorder": {"comment": {"message": "Snakes reappears on the opposite side when traveling through a border. Not compatible with WallOuterArea.", "width": "333px"}},
-				"movesPerArenaShrink": {"min": -1, "max": null, "step": 1, "comment": {"message": "How many moves the snakes can make before the playable area shrinks.<br>Special values:<br>-1: Disabled, area will not shrink.<br>&nbsp;0: The playable area's current width. Shrinks faster and faster."}},
-				"shrinkMode": {"default": "WallOuterArea", "comment": {"message": "RandomPlacedWall_fourSymmetry not symmetric with arena.threeDimensions."}}
+				"noOuterBorder": { "comment": { "message": "Snakes reappears on the opposite side when traveling through a border. Not compatible with WallOuterArea.", "width": "333px" } },
+				"movesPerArenaShrink": { "min": -1, "max": null, "step": 1, "comment": { "message": "How many moves the snakes can make before the playable area shrinks.<br>Special values:<br>-1: Disabled, area will not shrink.<br>&nbsp;0: The playable area's current width. Shrinks faster and faster." } },
+				"shrinkMode": { "default": "WallOuterArea", "comment": { "message": "RandomPlacedWall_fourSymmetry not symmetric with arena.threeDimensions." } }
 			}
 		},
 		"rules": {
@@ -32,11 +32,11 @@
 			"winner": ["LastWormStanding", "MostPoints"],
 			"bonusToLonger": false,
 			"_meta": {
-				"startLength": {"min": 1, "max": null, "step": 1},
-				"apples": {"default": "FourSymmetry", "comment": {"message": "<b>AppleLess:</b><br>Sets rules.startLength to infinity and border.movesPerArenaShrink to -1.<br><b>FourSymmetry:</b><br>When one is eaten, all get renewed.<br><b>FourRandom_asymmetric:</b><br>When one is eaten, all get renewed.<br><b>OneRandomPerWorm_asymmetric:</b><br>When one is eaten, only it get renewed."}},
-				"defeatedWorms": {"default": "Eatable"},
-				"winner": {"default": "LastWormStanding", "comment": {"message": "<b>Note:</b><br><i>MostPoints</i> is locked to <code>defeatedWorms:Solid</code>, due to otherwise last standing worm could play safe and collect eatables once its' opponents are gone."}},
-				"bonusToLonger": {"comment": {"message": "If two worms score equal, bonus point is dealt to the longer worm."}}
+				"startLength": { "min": 1, "max": null, "step": 1 },
+				"apples": { "default": "FourSymmetry", "comment": { "message": "<b>AppleLess:</b><br>Sets rules.startLength to infinity and border.movesPerArenaShrink to -1.<br><b>FourSymmetry:</b><br>When one is eaten, all get renewed.<br><b>FourRandom_asymmetric:</b><br>When one is eaten, all get renewed.<br><b>OneRandomPerWorm_asymmetric:</b><br>When one is eaten, only it get renewed." } },
+				"defeatedWorms": { "default": "Eatable" },
+				"winner": { "default": "LastWormStanding", "comment": { "message": "<b>Note:</b><br><i>MostPoints</i> is locked to <code>defeatedWorms:Solid</code>, due to otherwise last standing worm could play safe and collect eatables once its' opponents are gone." } },
+				"bonusToLonger": { "comment": { "message": "If two worms score equal, bonus point is dealt to the longer worm." } }
 			}
 		}
 	}

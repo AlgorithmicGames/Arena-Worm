@@ -3,7 +3,15 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>Replay</title>
-		<script async src="https://www.googletagmanager.com/gtag/js?id=G-TJFMG29186"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-TJFMG29186');</script>
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-TJFMG29186"></script>
+		<script>
+			window.dataLayer = window.dataLayer || []
+			function gtag() {
+				dataLayer.push(arguments)
+			}
+			gtag('js', new Date())
+			gtag('config', 'G-TJFMG29186')
+		</script>
 		<meta content="width=device-width, initial-scale=1.0" name="viewport">
 		<meta content="yes" name="mobile-web-app-capable">
 		<style>
@@ -35,14 +43,14 @@
 				justify-content: center;
 				align-items: center;
 			}
-			#score-board{
+			#score-board {
 				border: 1px solid black;
-				background-color: rgba(0,0,0,.9);
+				background-color: rgba(0, 0, 0, 0.9);
 				border-radius: 25px;
 				padding: 15px;
 				text-align: left;
 			}
-			#score-board tr>th:not(:first-child), #score-board tr>td:not(:first-child) {
+			#score-board tr > th:not(:first-child), #score-board tr > td:not(:first-child) {
 				padding-left: 1em;
 			}
 
@@ -67,10 +75,10 @@
 				background-color: #ffffff07;
 				border-width: 0.5px;
 				border-style: solid;
-				border-color: rgba(0, 0, 0, .2);
+				border-color: rgba(0, 0, 0, 0.2);
 			}
 			.wrapped .layer {
-				border-color: rgba(255, 255, 255, .2);
+				border-color: rgba(255, 255, 255, 0.2);
 			}
 			.layer:last-child, .gameboard-wall {
 				background-color: whitesmoke;
@@ -84,7 +92,7 @@
 			.space {
 				border-width: 0.5px;
 				border-style: solid;
-				border-color: rgba(0, 0, 0, .2);
+				border-color: rgba(0, 0, 0, 0.2);
 				text-align: center;
 				width: var(--square-size);
 				height: var(--square-size);
@@ -97,7 +105,7 @@
 				border-radius: 50%;
 				background-color: lightgreen;
 			}
-			.type-Wall>.eatable {
+			.type-Wall > .eatable {
 				display: none;
 			}
 
@@ -118,19 +126,19 @@
 			#gameboard.threeDimensions {
 				perspective: 100vmax;
 			}
-			#gameboard.threeDimensions>* {
+			#gameboard.threeDimensions > * {
 				transform-style: preserve-3d;
 			}
 		</style>
+		<script src="/ReplayHelper.js"></script>
 		<script src="index.js"></script>
-		<script src="https://Algorithmic.Games/ReplayHelper.js"></script>
 	</head>
 	<body onload="a()">
 		<div id="gameboard-wrapper">
 			<div id="gameboard">
 				<div id="layer-wrapper"></div>
 			</div>
-			<div id="score-board-outer-wrapper" style="display: none;">
+			<div id="score-board-outer-wrapper" style="display: none">
 				<div id="score-board-inner-wrapper">
 					<div id="score-board"></div>
 				</div>
@@ -142,8 +150,8 @@
 			<input type="button" id="step-back" value="<" disabled>
 			<input type="button" id="step-next" value=">">
 			<input type="range" value="0" min="0" id="slider">
-			<input type="range" value="76" min="0" max="90" id="slider-rotateX" style="display: none;">
-			<input type="range" value="8" min="-180" max="180" id="slider-rotateZ" style="display: none;">
+			<input type="range" value="76" min="0" max="90" id="slider-rotateX" style="display: none">
+			<input type="range" value="8" min="-180" max="180" id="slider-rotateZ" style="display: none">
 		</div>
 	</body>
 </html>
