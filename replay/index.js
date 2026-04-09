@@ -420,5 +420,6 @@ function a() {
 				selectMatches.dispatchEvent(new Event('change', { bubbles: true }))
 			}
 		}
+		selectMatches.onchange()
 	})
 }
