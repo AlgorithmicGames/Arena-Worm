@@ -2,8 +2,16 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
-		<title>Human interface for Worm</title>
-		<script async src="https://www.googletagmanager.com/gtag/js?id=G-TJFMG29186"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-TJFMG29186');</script>
+		<title>Human interface for Worm @ Algorithmic Games</title>
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-TJFMG29186"></script>
+		<script>
+			window.dataLayer = window.dataLayer || []
+			function gtag() {
+				dataLayer.push(arguments)
+			}
+			gtag('js', new Date())
+			gtag('config', 'G-TJFMG29186')
+		</script>
 		<meta content="width=device-width, initial-scale=1.0" name="viewport">
 		<meta content="yes" name="mobile-web-app-capable">
 		<style>
@@ -36,14 +44,14 @@
 				justify-content: center;
 				align-items: center;
 			}
-			#score-board{
+			#score-board {
 				border: 1px solid black;
-				background-color: rgba(0,0,0,.9);
+				background-color: rgba(0, 0, 0, 0.9);
 				border-radius: 25px;
 				padding: 15px;
 				text-align: left;
 			}
-			#score-board tr>th:not(:first-child), #score-board tr>td:not(:first-child) {
+			#score-board tr > th:not(:first-child), #score-board tr > td:not(:first-child) {
 				padding-left: 1em;
 			}
 
@@ -68,11 +76,11 @@
 				background-color: #ffffff07;
 				border-width: 0.5px;
 				border-style: solid;
-				border-color: rgba(0, 0, 0, .2);
+				border-color: rgba(0, 0, 0, 0.2);
 				width: fit-content;
 			}
 			.layer {
-				border-color: rgba(255, 255, 255, .2);
+				border-color: rgba(255, 255, 255, 0.2);
 			}
 			.layer:last-child, .gameboard-wall {
 				background-color: whitesmoke;
@@ -86,7 +94,7 @@
 			.space {
 				border-width: 0.5px;
 				border-style: solid;
-				border-color: rgba(0, 0, 0, .2);
+				border-color: rgba(0, 0, 0, 0.2);
 				text-align: center;
 				width: var(--square-size);
 				height: var(--square-size);
@@ -99,7 +107,7 @@
 				border-radius: 50%;
 				background-color: lightgreen;
 			}
-			.type-Wall>.eatable {
+			.type-Wall > .eatable {
 				display: none;
 			}
 
@@ -120,14 +128,14 @@
 			#gameboard.threeDimensions {
 				perspective: 100vmax;
 			}
-			#gameboard.threeDimensions>* {
+			#gameboard.threeDimensions > * {
 				transform-style: preserve-3d;
 			}
 			#lock {
 				display: none;
 			}
 			#lock.engaged {
-				background: rgba(128, 128, 128, .5);
+				background: rgba(128, 128, 128, 0.5);
 				justify-content: center;
 				font-size: xxx-large;
 				align-items: center;
@@ -142,191 +150,194 @@
 		</style>
 		<script>
 			'use strict'
-			let responseLock;
-			function a(){
-				responseLock = document.getElementById('lock');
-				function rotateArray(array){
-					let result = [];
-					for(let i = array[0].length-1; 0 <= i; i--){
-						let row = array.map(e => e[i]);
-						result.push(row);
+			let responseLock
+			function a() {
+				responseLock = document.getElementById('lock')
+				function rotateArray(array) {
+					let result = []
+					for (let i = array[0].length - 1; 0 <= i; i--) {
+						let row = array.map((e) => e[i])
+						result.push(row)
 					}
-					return result;
+					return result
 				}
-				let _init;
-				let layerWrapper = document.getElementById('layer-wrapper');
-				window.addEventListener('message', messageEvent => {
-					if(messageEvent.data.type === 'Post'){
-						responseLock.classList.remove('engaged');
-						if(_init.settings.arena.threeDimensions){
-							['north', 'south', 'east', 'west'].forEach(side => {
-								let wall = document.createElement('div');
-								wall.id = 'gameboard-wall-'+side;
-								wall.classList.add('gameboard-wall');
-								layerWrapper.appendChild(wall);
-							});
+				let _init
+				let layerWrapper = document.getElementById('layer-wrapper')
+				window.addEventListener('message', (messageEvent) => {
+					if (messageEvent.data.type === 'Post') {
+						responseLock.classList.remove('engaged')
+						if (_init.settings.arena.threeDimensions) {
+							;['north', 'south', 'east', 'west'].forEach((side) => {
+								let wall = document.createElement('div')
+								wall.id = 'gameboard-wall-' + side
+								wall.classList.add('gameboard-wall')
+								layerWrapper.appendChild(wall)
+							})
 						}
-						messageEvent.data.message.reverse().forEach(srcLayer => {
-							while(layerWrapper.firstChild){
-								layerWrapper.removeChild(layerWrapper.lastChild);
+						messageEvent.data.message.reverse().forEach((srcLayer) => {
+							while (layerWrapper.firstChild) {
+								layerWrapper.removeChild(layerWrapper.lastChild)
 							}
-							let layer = document.createElement('div');
-							layer.classList.add('layer');
-							if(_init.settings.rules.defeatedWorms === 'Solid'){
-								layer.classList.add('defeatedWorms_Solid');
+							let layer = document.createElement('div')
+							layer.classList.add('layer')
+							if (_init.settings.rules.defeatedWorms === 'Solid') {
+								layer.classList.add('defeatedWorms_Solid')
 							}
-							layerWrapper.appendChild(layer);
-							let gridTemplateColumns = '';
+							layerWrapper.appendChild(layer)
+							let gridTemplateColumns = ''
 							rotateArray(srcLayer).forEach((srcColumn, columIndex) => {
-								gridTemplateColumns += 'auto ';
+								gridTemplateColumns += 'auto '
 								srcColumn.forEach((spaceData, rowIndex) => {
-									let space = document.createElement('div');
-									space.classList.add('space');
-									if(rowIndex === 0){
-										space.classList.add('space-border-left');
+									let space = document.createElement('div')
+									space.classList.add('space')
+									if (rowIndex === 0) {
+										space.classList.add('space-border-left')
 									}
-									if(columIndex === _init.settings.arena.size-1){
-										space.classList.add('space-border-bottom');
+									if (columIndex === _init.settings.arena.size - 1) {
+										space.classList.add('space-border-bottom')
 									}
-									spaceData.grave.forEach(part => {
-										let spaceContent = document.createElement('div');
-										spaceContent.classList.add('space-content');
-										spaceContent.classList.add('type-Grave');
-										spaceContent.classList.add('type-'+part.type);
-										spaceContent.innerHTML = part.team;
-										spaceContent.style.color = 'orange'; // replay.arenaResult.teams[part.team].color.RGB;
-										space.appendChild(spaceContent);
-									});
-									if(spaceData.occupiedBy !== null){
-										space.classList.add('type-'+spaceData.occupiedBy.type);
-										if(spaceData.occupiedBy.type !== 'Wall'){
-											let spaceContent = document.createElement('div');
-											spaceContent.classList.add('space-content');
-											spaceContent.innerHTML = spaceData.occupiedBy.team;
-											spaceContent.classList.add('worm');
-											spaceContent.style.color = 'blue'; // replay.arenaResult.teams[spaceData.occupiedBy.team].color.RGB;
-											space.appendChild(spaceContent);
+									spaceData.grave.forEach((part) => {
+										let spaceContent = document.createElement('div')
+										spaceContent.classList.add('space-content')
+										spaceContent.classList.add('type-Grave')
+										spaceContent.classList.add('type-' + part.type)
+										spaceContent.innerHTML = part.team
+										spaceContent.style.color = 'orange' // replay.arenaResult.teams[part.team].color.RGB;
+										space.appendChild(spaceContent)
+									})
+									if (spaceData.occupiedBy !== null) {
+										space.classList.add('type-' + spaceData.occupiedBy.type)
+										if (spaceData.occupiedBy.type !== 'Wall') {
+											let spaceContent = document.createElement('div')
+											spaceContent.classList.add('space-content')
+											spaceContent.innerHTML = spaceData.occupiedBy.team
+											spaceContent.classList.add('worm')
+											spaceContent.style.color = 'blue' // replay.arenaResult.teams[spaceData.occupiedBy.team].color.RGB;
+											space.appendChild(spaceContent)
 										}
 									}
-									if(spaceData.eatables.apple || 0 < spaceData.eatables.other){
-										let spaceContent = document.createElement('div');
-										spaceContent.classList.add('space-content');
-										spaceContent.classList.add('eatable');
-										if(spaceData.eatables.apple){
-											spaceContent.innerHTML = '🍎';
-										}else{
-											spaceContent.innerHTML = spaceData.eatables.other;
-											spaceContent.style.fontStyle = 'italic';
+									if (spaceData.eatables.apple || 0 < spaceData.eatables.other) {
+										let spaceContent = document.createElement('div')
+										spaceContent.classList.add('space-content')
+										spaceContent.classList.add('eatable')
+										if (spaceData.eatables.apple) {
+											spaceContent.innerHTML = '🍎'
+										} else {
+											spaceContent.innerHTML = spaceData.eatables.other
+											spaceContent.style.fontStyle = 'italic'
 										}
-										space.appendChild(spaceContent);
+										space.appendChild(spaceContent)
 									}
-									layer.appendChild(space);
-								});
-							});
-							layer.style.gridTemplateColumns = gridTemplateColumns.trim();
-						});
-						(()=>{
-							let lastSize = null;
-							function place(){
-								let layers = layerWrapper.getElementsByClassName('layer');
-								let size = layers[0].offsetHeight;
-								if(size !== lastSize && 0 < size){
-									lastSize = size;
-									[...layers].forEach((layer, index) => {
-										if(0 < index){
-											layer.style.marginTop = -size+'px';
+									layer.appendChild(space)
+								})
+							})
+							layer.style.gridTemplateColumns = gridTemplateColumns.trim()
+						})
+						;(() => {
+							let lastSize = null
+							function place() {
+								let layers = layerWrapper.getElementsByClassName('layer')
+								let size = layers[0].offsetHeight
+								if (size !== lastSize && 0 < size) {
+									lastSize = size
+									;[...layers].forEach((layer, index) => {
+										if (0 < index) {
+											layer.style.marginTop = -size + 'px'
 										}
-										let translate = -(size/(_init.settings.arena.size-1))*index;
-										translate += size/2;
-										layer.style.transform = 'translateZ('+translate+'px)';
-									});
-									if(_init.settings.arena.threeDimensions){
-										let translate = -size/2;
-										[
+										let translate = -(size / (_init.settings.arena.size - 1)) * index
+										translate += size / 2
+										layer.style.transform = 'translateZ(' + translate + 'px)'
+									})
+									if (_init.settings.arena.threeDimensions) {
+										let translate = -size / 2
+										;[
 											{
 												side: 'north',
 												style: [
-													{key: 'height', value: size+'px'},
-													{key: 'width', value: size+'px'},
-													{key: 'transform', value: 'rotateX(-90deg) translateZ('+translate+'px)'}
-												]
-											},{
+													{ key: 'height', value: size + 'px' },
+													{ key: 'width', value: size + 'px' },
+													{ key: 'transform', value: 'rotateX(-90deg) translateZ(' + translate + 'px)' },
+												],
+											},
+											{
 												side: 'south',
 												style: [
-													{key: 'height', value: size+'px'},
-													{key: 'width', value: size+'px'},
-													{key: 'transform', value: 'rotateX(90deg) translateZ('+translate+'px)'}
-												]
-											},{
+													{ key: 'height', value: size + 'px' },
+													{ key: 'width', value: size + 'px' },
+													{ key: 'transform', value: 'rotateX(90deg) translateZ(' + translate + 'px)' },
+												],
+											},
+											{
 												side: 'east',
 												style: [
-													{key: 'height', value: size+'px'},
-													{key: 'width', value: size+'px'},
-													{key: 'transform', value: 'rotateX(90deg) rotateY(-90deg) translateZ('+translate+'px)'}
-												]
-											},{
+													{ key: 'height', value: size + 'px' },
+													{ key: 'width', value: size + 'px' },
+													{ key: 'transform', value: 'rotateX(90deg) rotateY(-90deg) translateZ(' + translate + 'px)' },
+												],
+											},
+											{
 												side: 'west',
 												style: [
-													{key: 'height', value: size+'px'},
-													{key: 'width', value: size+'px'},
-													{key: 'transform', value: 'rotateX(90deg) rotateY(90deg) translateZ('+translate+'px)'}
-												]
-											}
-										].forEach(w => {
-											let wall = document.getElementById('gameboard-wall-'+w.side);
-											w.style.forEach(style => {
-												wall.style[style.key] = style.value;
-											});
-										});
+													{ key: 'height', value: size + 'px' },
+													{ key: 'width', value: size + 'px' },
+													{ key: 'transform', value: 'rotateX(90deg) rotateY(90deg) translateZ(' + translate + 'px)' },
+												],
+											},
+										].forEach((w) => {
+											let wall = document.getElementById('gameboard-wall-' + w.side)
+											w.style.forEach((style) => {
+												wall.style[style.key] = style.value
+											})
+										})
 									}
 								}
-								requestAnimationFrame(place);
+								requestAnimationFrame(place)
 							}
-							place();
-						})();
-					}else if(!_init){
-						_init = messageEvent.data;
+							place()
+						})()
+					} else if (!_init) {
+						_init = messageEvent.data
 					}
-				});
-				window.opener.postMessage(null, '*');
+				})
+				window.opener.postMessage(null, '*')
 			}
-			function buttonPressed(direction){
-				if(!responseLock.classList.contains('engaged')){
-					responseLock.classList.add('engaged');
-					window.opener.postMessage({value: direction.split(' ')[0]}, '*');
+			function buttonPressed(direction) {
+				if (!responseLock.classList.contains('engaged')) {
+					responseLock.classList.add('engaged')
+					window.opener.postMessage({ value: direction.split(' ')[0] }, '*')
 				}
 			}
-			document.addEventListener('keydown', keyboardEvent => {
-				switch(keyboardEvent.key){
+			document.addEventListener('keydown', (keyboardEvent) => {
+				switch (keyboardEvent.key) {
 					case 'w':
 					case 'ArrowUp':
-						buttonPressed('y+');
-						break;
+						buttonPressed('y+')
+						break
 					case 's':
 					case 'ArrowDown':
-						buttonPressed('y-');
-						break;
+						buttonPressed('y-')
+						break
 					case 'd':
 					case 'ArrowRight':
-						buttonPressed('x+');
-						break;
+						buttonPressed('x+')
+						break
 					case 'a':
 					case 'ArrowLeft':
-						buttonPressed('x-');
-						break;
+						buttonPressed('x-')
+						break
 					case 'q':
-						if(_init.settings.arena.threeDimensions){
-							buttonPressed('z+');
+						if (_init.settings.arena.threeDimensions) {
+							buttonPressed('z+')
 						}
-						break;
+						break
 					case 'z':
 					case 'e':
-						if(_init.settings.arena.threeDimensions){
-							buttonPressed('z-');
+						if (_init.settings.arena.threeDimensions) {
+							buttonPressed('z-')
 						}
-						break;
+						break
 				}
-			});
+			})
 		</script>
 	</head>
 	<body onload="a()">
