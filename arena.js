@@ -68,7 +68,7 @@ class Controllable extends Placeable {
 }
 class SolidWorm extends Controllable {
 	constructor(direction = new Direction()) {
-		const BODY = new Array()
+		const BODY = []
 		super(BODY, _worms.length)
 		this.direction = direction
 		this.extendBody = () => {
@@ -80,14 +80,14 @@ class SolidWorm extends Controllable {
 			this.extendBody()
 		}
 		this.getWormIndex = () => {
-			let index = _worms.indexOf(this)
+			const index = _worms.indexOf(this)
 			if (index === -1) {
 				ArenaHelper.postAbort('', 'SolidWorm not in list.')
 			}
 			return index
 		}
 		this.move = (nextSpace) => {
-			let firstSpace = nextSpace
+			const firstSpace = nextSpace
 			if (_settings.rules.apples === 'AppleLess') {
 				this.extendBody()
 			}
@@ -109,7 +109,7 @@ class SolidWorm extends Controllable {
 		this.kill = () => {
 			_worms.splice(this.getWormIndex(), 1)
 			BODY.forEach((part) => {
-				let space = part.getSpace()
+				const space = part.getSpace()
 				if (space) {
 					space.addToGrave(part)
 					let occupiedBy
@@ -121,7 +121,7 @@ class SolidWorm extends Controllable {
 							space.addEatable()
 							if (part.constructor.name === 'SolidWorm') {
 								BODY.filter((b) => !b.getSpace()).forEach(space.addEatable)
-							}
+							} /* fall through */
 						case 'Disappears':
 							occupiedBy = null
 							break
@@ -160,8 +160,8 @@ class Apple {
 }
 class Space {
 	constructor(x, y, z) {
-		const CHALLENGERS = new Array()
-		const GRAVE = new Array()
+		const CHALLENGERS = []
+		const GRAVE = []
 		Object.defineProperty(this, 'POS', {
 			value: Object.freeze({ x: x, y: y, z: z }),
 			writable: false,
@@ -197,7 +197,7 @@ class Space {
 			}
 		}
 		this.executeChallenge = () => {
-			let willBeUnoccupied = occupiedBy === null ? true : !(occupiedBy instanceof Wall) && occupiedBy.getLength() - 1 === occupiedBy.BODY_INDEX
+			const willBeUnoccupied = occupiedBy === null ? true : !(occupiedBy instanceof Wall) && occupiedBy.getLength() - 1 === occupiedBy.BODY_INDEX
 			CHALLENGERS.forEach((solidWorm) => {
 				if (willBeUnoccupied) {
 					solidWorm.move(this)
@@ -234,9 +234,9 @@ class Space {
 }
 function getPos(solidWorm) {
 	for (let z = 0; z < _arena.length; z++) {
-		let column = _arena[z]
+		const column = _arena[z]
 		for (let x = 0; x < column.length; x++) {
-			let row = column[x]
+			const row = column[x]
 			for (let y = 0; y < row.length; y++) {
 				if (solidWorm === row[y].getOccupiedBy()) {
 					return { z: z, x: x, y: y }
@@ -268,12 +268,12 @@ function getNextPos(pos, direction) {
 			pos.z--
 			break
 	}
-	let xUnder = pos.x < 0
-	let xOver = _settings.arena.size <= pos.x
-	let yUnder = pos.y < 0
-	let yOver = _settings.arena.size <= pos.y
-	let zUnder = pos.z < 0
-	let zOver = (_settings.arena.threeDimensions ? _settings.arena.size : 1) <= pos.z
+	const xUnder = pos.x < 0
+	const xOver = _settings.arena.size <= pos.x
+	const yUnder = pos.y < 0
+	const yOver = _settings.arena.size <= pos.y
+	const zUnder = pos.z < 0
+	const zOver = (_settings.arena.threeDimensions ? _settings.arena.size : 1) <= pos.z
 	if (xUnder || xOver || yUnder || yOver || zUnder || zOver) {
 		if (_settings.border.noOuterBorder) {
 			if (xUnder) {
@@ -379,8 +379,8 @@ function updateDirection(participant) {
 		}
 		return direction
 	}
-	let solidWorm = participant.payload.worm
-	let direction = rotateDirection(solidWorm, getSelectedDirection(participant.payload.response))
+	const solidWorm = participant.payload.worm
+	const direction = rotateDirection(solidWorm, getSelectedDirection(participant.payload.response))
 	let notAllowedDirection
 	switch (solidWorm.direction) {
 		case Directions.FORWARD:
@@ -407,15 +407,15 @@ function updateDirection(participant) {
 	}
 }
 function parseArena() {
-	let parsedArena = []
+	const parsedArena = []
 	_arena.forEach((c) => {
-		let column = []
+		const column = []
 		parsedArena.push(column)
 		c.forEach((r) => {
-			let row = []
+			const row = []
 			column.push(row)
 			r.forEach((space) => {
-				let placeable = space.getOccupiedBy()
+				const placeable = space.getOccupiedBy()
 				let occupiedBy = null
 				if (placeable !== null) {
 					occupiedBy = {
@@ -442,25 +442,26 @@ function parseArena() {
 	return parsedArena
 }
 function tick() {
-	if (_shrinkOnTick !== null) {
-		function wall(space) {
-			if (space.getEatables().apple) {
-				space.toggleApple()
-			}
-			let occupiedBy = space.getOccupiedBy()
-			if (occupiedBy !== null) {
-				switch (occupiedBy.constructor.name) {
-					case 'TrailingBody':
-						occupiedBy = occupiedBy.getHead()
-					case 'SolidWorm':
-						occupiedBy.kill()
-						break
-				}
-			}
-			if (occupiedBy === null || occupiedBy.constructor.name !== 'Wall') {
-				space.setOccupiedBy(new Wall(space, occupiedBy))
+	function wall(space) {
+		if (space.getEatables().apple) {
+			space.toggleApple()
+		}
+		let occupiedBy = space.getOccupiedBy()
+		if (occupiedBy !== null) {
+			switch (occupiedBy.constructor.name) {
+				case 'TrailingBody':
+					occupiedBy = occupiedBy.getHead()
+					/* fall through */
+				case 'SolidWorm':
+					occupiedBy.kill()
+					break
 			}
 		}
+		if (occupiedBy === null || occupiedBy.constructor.name !== 'Wall') {
+			space.setOccupiedBy(new Wall(space, occupiedBy))
+		}
+	}
+	if (_shrinkOnTick !== null) {
 		_ticksSinceShrink++
 		if (_shrinkOnTick === _ticksSinceShrink) {
 			_ticksSinceShrink = 0
@@ -469,28 +470,30 @@ function tick() {
 				case 'RandomPlacedWall_single':
 					spaces = spaces.filter((space) => space.getOccupiedBy() === null)
 					if (spaces.length) {
-						let randomSpace = Math.floor(Math.random() * spaces.length)
+						const randomSpace = Math.floor(Math.random() * spaces.length)
 						wall(spaces[randomSpace])
 					}
 					break
 				case 'RandomPlacedWall_fourSymmetry':
-					let retries = 100
-					while (0 < retries) {
-						retries--
-						let layer = Math.floor(Math.random() * _arena.length)
-						let short = Math.floor(Math.random() * Math.floor(_settings.arena.size / 2))
-						let long = Math.floor(Math.random() * Math.ceil(_settings.arena.size / 2))
-						spaces = [
-							_arena[layer][short][long],
-							_arena[layer][_settings.arena.size - 1 - long][short],
-							_arena[layer][long][_settings.arena.size - 1 - short],
-							_arena[layer][_settings.arena.size - 1 - short][_settings.arena.size - 1 - long],
-						]
-						if (spaces.filter((space) => space.getOccupiedBy() === null).length === spaces.length) {
-							spaces.forEach((space) => {
-								wall(space)
-							})
-							break
+					{
+						let retries = 100
+						while (0 < retries) {
+							retries--
+							const layer = Math.floor(Math.random() * _arena.length)
+							const short = Math.floor(Math.random() * Math.floor(_settings.arena.size / 2))
+							const long = Math.floor(Math.random() * Math.ceil(_settings.arena.size / 2))
+							spaces = [
+								_arena[layer][short][long],
+								_arena[layer][_settings.arena.size - 1 - long][short],
+								_arena[layer][long][_settings.arena.size - 1 - short],
+								_arena[layer][_settings.arena.size - 1 - short][_settings.arena.size - 1 - long],
+							]
+							if (spaces.filter((space) => space.getOccupiedBy() === null).length === spaces.length) {
+								spaces.forEach((space) => {
+									wall(space)
+								})
+								break
+							}
 						}
 					}
 					break
@@ -498,7 +501,7 @@ function tick() {
 					_worms.forEach(() => {
 						spaces = spaces.filter((space) => space.getOccupiedBy() === null)
 						if (spaces.length) {
-							let randomSpace = Math.floor(Math.random() * spaces.length)
+							const randomSpace = Math.floor(Math.random() * spaces.length)
 							wall(spaces[randomSpace])
 						}
 					})
@@ -526,9 +529,9 @@ function tick() {
 				Apple.getPlacedApples().forEach((space) => {
 					space.toggleApple()
 				})
-				let layer = Math.floor(Math.random() * _arena.length)
-				let short = Math.floor(Math.random() * Math.floor(_settings.arena.size / 2))
-				let long = Math.floor(Math.random() * Math.ceil(_settings.arena.size / 2))
+				const layer = Math.floor(Math.random() * _arena.length)
+				const short = Math.floor(Math.random() * Math.floor(_settings.arena.size / 2))
+				const long = Math.floor(Math.random() * Math.ceil(_settings.arena.size / 2))
 				_arena[layer][short][long].toggleApple()
 				_arena[layer][_settings.arena.size - 1 - long][short].toggleApple()
 				_arena[layer][long][_settings.arena.size - 1 - short].toggleApple()
@@ -546,9 +549,9 @@ function tick() {
 					space.toggleApple()
 				})
 				while (Apple.getPlacedApples().length < 4) {
-					let emptySpaces = getEmptySpaces()
+					const emptySpaces = getEmptySpaces()
 					if (emptySpaces.length) {
-						let randomSpace = Math.floor(Math.random() * emptySpaces.length)
+						const randomSpace = Math.floor(Math.random() * emptySpaces.length)
 						emptySpaces[randomSpace].toggleApple()
 					} else {
 						break
@@ -559,9 +562,9 @@ function tick() {
 		case 'Single':
 		case 'OneRandomPerWorm_asymmetric':
 			while (Apple.getPlacedApples().length < (_settings.rules.apples === 'Single' ? 1 : _worms.length)) {
-				let emptySpaces = getEmptySpaces()
+				const emptySpaces = getEmptySpaces()
 				if (emptySpaces.length) {
-					let randomSpace = Math.floor(Math.random() * emptySpaces.length)
+					const randomSpace = Math.floor(Math.random() * emptySpaces.length)
 					emptySpaces[randomSpace].toggleApple()
 				} else {
 					break
@@ -569,7 +572,7 @@ function tick() {
 			}
 			break
 	}
-	let parsedArena = parseArena()
+	const parsedArena = parseArena()
 	ArenaHelper.log('tick', parsedArena)
 	_participantPromises = []
 	_worms.forEach((solidWorm) => {
@@ -611,7 +614,7 @@ function tick() {
 				arenaClone = rotateArray(arenaClone)
 			}
 		}
-		let participant = solidWorm.getParticipant()
+		const participant = solidWorm.getParticipant()
 		participant.payload.response = null
 		participant.postMessage(arenaClone).then((response) => {
 			if (response.message) {
@@ -623,15 +626,15 @@ function tick() {
 		_participantPromises.push(new Promise((resolve) => participant.payload.wormUpdated = resolve))
 	})
 	Promise.allSettled(_participantPromises).then(() => {
-		let challengedSpaces = []
-		let borderCollisions = []
+		const challengedSpaces = []
+		const borderCollisions = []
 		_worms.forEach((solidWorm) => {
-			let pos = getPos(solidWorm)
-			let posNext = getNextPos(pos, solidWorm.direction)
+			const pos = getPos(solidWorm)
+			const posNext = getNextPos(pos, solidWorm.direction)
 			if (posNext === null) {
 				borderCollisions.push(solidWorm)
 			} else {
-				let space = _arena[posNext.z][posNext.x][posNext.y]
+				const space = _arena[posNext.z][posNext.x][posNext.y]
 				space.addChallenger(solidWorm)
 				if (!challengedSpaces.includes(space)) {
 					challengedSpaces.push(space)
@@ -657,11 +660,11 @@ function tick() {
 			tick()
 		} else {
 			if (_settings.rules.winner === 'LastWormStanding' && _settings.rules.bonusToLonger) {
-				let list = []
+				const list = []
 				let maxLength = -1
 				while (list.length < _participants.countTeams()) {
-					let participant = _participants.get(list.length, 0)
-					let wormLength = participant.payload.worm.getLength()
+					const participant = _participants.get(list.length, 0)
+					const wormLength = participant.payload.worm.getLength()
 					maxLength = Math.max(maxLength, wormLength)
 					list.push({
 						participant: participant,
@@ -691,9 +694,9 @@ function tick() {
 	})
 }
 function rotateArray(array) {
-	let result = []
+	const result = []
 	for (let i = 0; i < array[0].length; i++) {
-		let row = array.map((e) => e[i]).reverse()
+		const row = array.map((e) => e[i]).reverse()
 		result.push(row)
 	}
 	return result
@@ -714,7 +717,7 @@ ArenaHelper.init = (participants, settings) => {
 	} else if (_settings.border.shrinkMode === 'WallOuterArea' && _settings.border.noOuterBorder) {
 		ArenaHelper.postAbort('', 'WallOuterArea is not compatible with noOuterBorder.')
 	} else {
-		let shrinkSetting = _settings.rules.apples === 'AppleLess' ? -1 : _settings.border.movesPerArenaShrink
+		const shrinkSetting = _settings.rules.apples === 'AppleLess' ? -1 : _settings.border.movesPerArenaShrink
 		if (shrinkSetting < 0) {
 			_shrinkOnTick = null
 		} else if (shrinkSetting === 0) {
@@ -725,9 +728,9 @@ ArenaHelper.init = (participants, settings) => {
 
 		_arena = []
 		while (_arena.length < _settings.arena.size) {
-			let column = []
+			const column = []
 			while (column.length < _settings.arena.size) {
-				let row = []
+				const row = []
 				while (row.length < _settings.arena.size) {
 					row.push(new Space(column.length, row.length, _arena.length))
 				}
@@ -780,7 +783,7 @@ ArenaHelper.init = (participants, settings) => {
 			},
 		].forEach((input) => {
 			if (_worms.length < _participants.countTeams()) {
-				let solidWorm = new SolidWorm(...input.solidWorm)
+				const solidWorm = new SolidWorm(...input.solidWorm)
 				_arena[input.z][input.x][input.y].setOccupiedBy(solidWorm)
 				_worms.push(solidWorm)
 			}
