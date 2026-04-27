@@ -304,7 +304,14 @@
 			function buttonPressed(direction) {
 				if (!responseLock.classList.contains('engaged')) {
 					responseLock.classList.add('engaged')
-					window.opener.postMessage({ value: direction.split(' ')[0] }, '*')
+					const value = direction.split(' ')[0]
+					window.opener.postMessage({
+						type: 'Response',
+						response: {
+							value,
+							executionSteps: { toRespond: 0, toTerminate: 0 },
+						},
+					}, '*')
 				}
 			}
 			document.addEventListener('keydown', (keyboardEvent) => {
