@@ -24,10 +24,15 @@
 				margin-bottom: 0;
 			}
 			body {
-				height: 100%;
 				display: grid;
 				text-align: center;
 				grid-template-rows: auto min-content;
+			}
+
+			#gameboard-wrapper {
+				position: relative;
+				min-height: 0;
+				width: 100%;
 			}
 
 			#score-board-outer-wrapper {
@@ -56,6 +61,7 @@
 			}
 
 			#gameboard {
+				position: relative;
 				cursor: default;
 				user-select: none;
 				display: inline-block;
@@ -64,8 +70,26 @@
 			#controller {
 				width: 100%;
 				display: flex;
+				flex-wrap: wrap;
+				gap: 6px;
+				justify-content: center;
 				position: relative;
 				margin-bottom: 8px;
+				padding: 8px 4px;
+			}
+			#controller button {
+				background: rgba(0, 0, 0, 0.85);
+				color: chartreuse;
+				border: 1px solid rgba(255, 255, 255, 0.25);
+				border-radius: 8px;
+				padding: 8px 10px;
+				cursor: pointer;
+			}
+			#controller button:hover {
+				border-color: rgba(255, 255, 255, 0.45);
+			}
+			#controller button:active {
+				opacity: 0.9;
 			}
 			#slider, #slider-layer {
 				width: -webkit-fill-available;
@@ -79,7 +103,7 @@
 				border-color: rgba(0, 0, 0, 0.2);
 				width: fit-content;
 			}
-			.layer {
+			.wrapped .layer {
 				border-color: rgba(255, 255, 255, 0.2);
 			}
 			.layer:last-child, .gameboard-wall {
@@ -134,25 +158,95 @@
 			#lock {
 				display: none;
 			}
+			#gameboard-wrapper:has(#lock.booting) {
+				min-height: min(42vh, 360px);
+			}
 			#lock.engaged {
-				background: rgba(128, 128, 128, 0.5);
 				justify-content: center;
-				font-size: xxx-large;
 				align-items: center;
 				position: absolute;
+				inset: 0;
 				display: flex;
 				z-index: 9999;
-				height: 100%;
-				width: 100%;
-				right: 0;
-				top: 0;
+				box-sizing: border-box;
+				font-size: xxx-large;
+				text-align: center;
+				background: rgba(0, 0, 0, 0.82);
+			}
+			#lock.engaged.booting {
+				color: rgba(200, 255, 120, 0.95);
+			}
+			#lock.engaged:not(.booting) {
+				color: chartreuse;
 			}
 		</style>
 		<script>
 			'use strict'
 			let responseLock
+			let _init
 			function a() {
 				responseLock = document.getElementById('lock')
+				const gameboard = document.getElementById('gameboard')
+				const gameboardWrapper = document.getElementById('gameboard-wrapper')
+				const controller = document.getElementById('controller')
+				/** Team hues match `ReplayHelper` replay defaults (`#getColor`). */
+				function hslIndexToRgbHex(index, total) {
+					const offset = total % 1 ? 0.5 : 2 / 3
+					const hue = ((total ? index / total : index) + offset) % 1
+					const saturation = 1
+					const lightness = 0.5
+					const q = lightness < 0.5 ? lightness * (1 + saturation) : lightness + saturation - lightness * saturation
+					const p = 2 * lightness - q
+					function hueToRGB(t) {
+						if (t < 0) t += 1
+						if (1 < t) t -= 1
+						if (t < 1 / 6) return p + (q - p) * 6 * t
+						if (t < 1 / 2) return q
+						if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6
+						return p
+					}
+					const R = hueToRGB(hue + 1 / 3)
+					const G = hueToRGB(hue)
+					const B = hueToRGB(hue - 1 / 3)
+					const toHex = (c) => {
+						const n = Math.round(255 * c).toString(16)
+						return n.length === 1 ? '0' + n : n
+					}
+					return '#' + toHex(R) + toHex(G) + toHex(B)
+				}
+				function teamRgbHex(teamIndex, teamCount, onlySingleTeams) {
+					let idx = teamIndex
+					let total = teamCount
+					if (idx === 1 && total === 2 && onlySingleTeams) {
+						idx = 1
+						total = 3
+					}
+					return hslIndexToRgbHex(idx, total)
+				}
+				function metaFromInit(init) {
+					const opponents = init?.opponents
+					const teamCount = Array.isArray(opponents) && opponents.length > 0 ? opponents.length : 2
+					const onlySingleTeams = Array.isArray(opponents) &&
+						opponents.every((o) => o === null || (Array.isArray(o) && o.length === 1))
+					return { teamCount, onlySingleTeams }
+				}
+				function layoutResize() {
+					if (!gameboard || gameboard.offsetWidth === 0) {
+						setTimeout(layoutResize, 100)
+						return
+					}
+					gameboard.parentElement.style.margin = ''
+					gameboard.style.zoom = '1'
+					const bodyMargin = parseFloat(getComputedStyle(document.body).marginTop) +
+						parseFloat(getComputedStyle(document.body).marginBottom)
+					const wrapperHeight = window.innerHeight -
+						parseFloat(getComputedStyle(controller).height) - bodyMargin
+					const wrapperSize = Math.min(gameboard.parentElement.offsetWidth, wrapperHeight)
+					const zoom = wrapperSize / gameboard.offsetWidth
+					const three = _init?.settings?.arena?.threeDimensions
+					gameboard.style.zoom = String(zoom * (three ? 0.5 : 0.9))
+					gameboard.parentElement.style.margin = 'auto'
+				}
 				function rotateArray(array) {
 					let result = []
 					for (let i = array[0].length - 1; 0 <= i; i--) {
@@ -161,12 +255,14 @@
 					}
 					return result
 				}
-				let _init
 				let layerWrapper = document.getElementById('layer-wrapper')
+				window.onresize = layoutResize
 				window.addEventListener('message', (messageEvent) => {
 					if (messageEvent.data.type === 'Post') {
-						responseLock.classList.remove('engaged')
+						const { teamCount, onlySingleTeams } = metaFromInit(_init)
+						responseLock.classList.remove('engaged', 'booting')
 						if (_init.settings.arena.threeDimensions) {
+							gameboard.classList.add('threeDimensions')
 							;['north', 'south', 'east', 'west'].forEach((side) => {
 								let wall = document.createElement('div')
 								wall.id = 'gameboard-wall-' + side
@@ -202,7 +298,7 @@
 										spaceContent.classList.add('type-Grave')
 										spaceContent.classList.add('type-' + part.type)
 										spaceContent.innerHTML = part.team
-										spaceContent.style.color = 'orange' // replay.arenaResult.teams[part.team].color.RGB;
+										spaceContent.style.color = teamRgbHex(part.team, teamCount, onlySingleTeams)
 										space.appendChild(spaceContent)
 									})
 									if (spaceData.occupiedBy !== null) {
@@ -210,9 +306,9 @@
 										if (spaceData.occupiedBy.type !== 'Wall') {
 											let spaceContent = document.createElement('div')
 											spaceContent.classList.add('space-content')
-											spaceContent.innerHTML = spaceData.occupiedBy.team
+											spaceContent.innerHTML = spaceData.occupiedBy.team + 1
 											spaceContent.classList.add('worm')
-											spaceContent.style.color = 'blue' // replay.arenaResult.teams[spaceData.occupiedBy.team].color.RGB;
+											spaceContent.style.color = teamRgbHex(spaceData.occupiedBy.team, teamCount, onlySingleTeams)
 											space.appendChild(spaceContent)
 										}
 									}
@@ -295,8 +391,12 @@
 							}
 							place()
 						})()
+						queueMicrotask(layoutResize)
 					} else if (!_init) {
 						_init = messageEvent.data
+						if (_init.settings?.border?.noOuterBorder && gameboardWrapper) {
+							gameboardWrapper.classList.add('wrapped')
+						}
 					}
 				})
 				window.opener.postMessage(null, '*')
@@ -304,6 +404,8 @@
 			function buttonPressed(direction) {
 				if (!responseLock.classList.contains('engaged')) {
 					responseLock.classList.add('engaged')
+					const label = responseLock.querySelector('span')
+					if (label) label.textContent = 'Awaiting update'
 					const value = direction.split(' ')[0]
 					window.opener.postMessage({
 						type: 'Response',
@@ -315,6 +417,7 @@
 				}
 			}
 			document.addEventListener('keydown', (keyboardEvent) => {
+				if (!_init?.settings?.arena) return
 				switch (keyboardEvent.key) {
 					case 'w':
 					case 'ArrowUp':
@@ -348,15 +451,19 @@
 		</script>
 	</head>
 	<body onload="a()">
-		<div id="lock" class="engaged"><span>Awaiting update</span></div>
-		<div id="layer-wrapper"></div>
-		<div>
-			<button onclick="buttonPressed(this.innerHTML)">x+ (D or right arrow)</button>
-			<button onclick="buttonPressed(this.innerHTML)">x- (A or left arrow)</button>
-			<button onclick="buttonPressed(this.innerHTML)">y+ (W or up arrow)</button>
-			<button onclick="buttonPressed(this.innerHTML)">y- (S or down arrow)</button>
-			<button onclick="buttonPressed(this.innerHTML)">z+ (Q)</button>
-			<button onclick="buttonPressed(this.innerHTML)">z- (E or Z)</button>
+		<div id="gameboard-wrapper">
+			<div id="gameboard">
+				<div id="layer-wrapper"></div>
+			</div>
+			<div id="lock" class="engaged booting"><span>Waiting for arena…</span></div>
+		</div>
+		<div id="controller">
+			<button type="button" onclick="buttonPressed(this.innerHTML)">x+ (D or right arrow)</button>
+			<button type="button" onclick="buttonPressed(this.innerHTML)">x- (A or left arrow)</button>
+			<button type="button" onclick="buttonPressed(this.innerHTML)">y+ (W or up arrow)</button>
+			<button type="button" onclick="buttonPressed(this.innerHTML)">y- (S or down arrow)</button>
+			<button type="button" onclick="buttonPressed(this.innerHTML)">z+ (Q)</button>
+			<button type="button" onclick="buttonPressed(this.innerHTML)">z- (E or Z)</button>
 		</div>
 	</body>
 </html>
