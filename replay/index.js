@@ -24,7 +24,6 @@ function _a() {
 		let _currentMatchIndex = 0
 		let activeMatchLog = null
 		let ticksCache = []
-		let rawLogSynced = 0
 		let tickPollTimer = null
 		let threeDDocumentListenersAttached = false
 		let dragPos = null
@@ -77,21 +76,23 @@ function _a() {
 
 		void replay.onAbort.then(() => rebuildScoreboard())
 
-		async function pullGameplayTicks() {
-			if (!activeMatchLog) return
-			const total = await activeMatchLog.log.count()
-			while (rawLogSynced < total) {
-				const entry = await activeMatchLog.log.get(rawLogSynced)
-				rawLogSynced++
-				if (entry && entry.type === 'tick') {
-					ticksCache.push(entry)
+		let promiseQueue = Promise.resolve()
+		function pullGameplayTicks() {
+			return promiseQueue = promiseQueue.then(async () => {
+				if (!activeMatchLog) return
+				const total = await activeMatchLog.log.count()
+				while (ticksCache.length < total) {
+					const entry = await activeMatchLog.log.get(ticksCache.length)
+					if (entry && entry.type === 'tick') {
+						ticksCache.push(entry)
+					}
 				}
-			}
-			const maxTickIndex = ticksCache.length === 0 ? 0 : ticksCache.length - 1
-			slider.max = maxTickIndex
-			if (slider.valueAsNumber > maxTickIndex) {
-				slider.valueAsNumber = maxTickIndex
-			}
+				const maxTickIndex = ticksCache.length === 0 ? 0 : ticksCache.length - 1
+				slider.max = maxTickIndex
+				if (slider.valueAsNumber > maxTickIndex) {
+					slider.valueAsNumber = maxTickIndex
+				}
+			})
 		}
 
 		function angleChange() {
@@ -139,7 +140,6 @@ function _a() {
 			matchCompleted = false
 			scoreBoard.parentElement.parentElement.style.display = 'none'
 			ticksCache = []
-			rawLogSynced = 0
 
 			if (replay.arenaResult.settings.arena.threeDimensions) {
 				if (!threeDDocumentListenersAttached) {
