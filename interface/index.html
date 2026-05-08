@@ -26,7 +26,7 @@
 			body {
 				display: grid;
 				text-align: center;
-				grid-template-rows: auto min-content;
+				grid-template-rows: auto min-content min-content;
 			}
 
 			#gameboard-wrapper {
@@ -182,10 +182,12 @@
 		</style>
 		<script>
 			'use strict'
-			let responseLock
+			let _responseLock
 			let _init
+			let _shrinkOnTick
+			let _tick = 0
 			function a() {
-				responseLock = document.getElementById('lock')
+				_responseLock = document.getElementById('lock')
 				const gameboard = document.getElementById('gameboard')
 				const gameboardWrapper = document.getElementById('gameboard-wrapper')
 				const controller = document.getElementById('controller')
@@ -259,8 +261,12 @@
 				window.onresize = layoutResize
 				window.addEventListener('message', (messageEvent) => {
 					if (messageEvent.data.type === 'Post') {
+						_tick++
+						if (_shrinkOnTick !== null) {
+							document.getElementById('shrink-counter').textContent = 'Moves until next shrink: ' + (_shrinkOnTick - (_tick % _shrinkOnTick) - 1)
+						}
 						const { teamCount, onlySingleTeams } = metaFromInit(_init)
-						responseLock.classList.remove('engaged', 'booting')
+						_responseLock.classList.remove('engaged', 'booting')
 						if (_init.settings.arena.threeDimensions) {
 							gameboard.classList.add('threeDimensions')
 							;['north', 'south', 'east', 'west'].forEach((side) => {
@@ -397,14 +403,22 @@
 						if (_init.settings?.border?.noOuterBorder && gameboardWrapper) {
 							gameboardWrapper.classList.add('wrapped')
 						}
+						const shrinkSetting = _init.settings.rules.apples === 'AppleLess' ? -1 : _init.settings.border.movesPerArenaShrink
+						if (shrinkSetting < 0) {
+							_shrinkOnTick = null
+						} else if (shrinkSetting === 0) {
+							_shrinkOnTick = _init.settings.arena.size
+						} else {
+							_shrinkOnTick = _init.settings.border.movesPerArenaShrink
+						}
 					}
 				})
 				window.opener.postMessage(null, '*')
 			}
 			function buttonPressed(direction) {
-				if (!responseLock.classList.contains('engaged')) {
-					responseLock.classList.add('engaged')
-					const label = responseLock.querySelector('span')
+				if (!_responseLock.classList.contains('engaged')) {
+					_responseLock.classList.add('engaged')
+					const label = _responseLock.querySelector('span')
 					if (label) label.textContent = 'Awaiting update'
 					const value = direction.split(' ')[0]
 					window.opener.postMessage({
@@ -457,6 +471,7 @@
 			</div>
 			<div id="lock" class="engaged booting"><span>Waiting for arena…</span></div>
 		</div>
+		<p id="shrink-counter"></p>
 		<div id="controller">
 			<button type="button" onclick="buttonPressed(this.innerHTML)">x+ (D or right arrow)</button>
 			<button type="button" onclick="buttonPressed(this.innerHTML)">x- (A or left arrow)</button>
