@@ -21,13 +21,12 @@ function _a() {
 		const scoreBoard = document.getElementById('score-board')
 		const selectMatches = document.getElementById('matches')
 		const play = document.getElementById('play')
-		let _currentMatchIndex = 0
+		const matchCompleted = []
 		let activeMatchLog = null
 		let ticksCache = []
 		let tickPollTimer = null
 		let threeDDocumentListenersAttached = false
 		let dragPos = null
-		let matchCompleted = false
 		const bestOfRaw = replay.arenaResult.settings?.general?.bestOf
 		const bestOfCount = Number.isFinite(Number(bestOfRaw)) && Number(bestOfRaw) >= 1 ? Math.floor(Number(bestOfRaw)) : 1
 
@@ -104,6 +103,10 @@ function _a() {
 			}
 		}
 
+		function getCurrentMatchIndex() {
+			return replay.arenaResult.match.findIndex((match) => match === activeMatchLog)
+		}
+
 		globalThis.onresize = () => {
 			if (gameboard.offsetWidth === 0) {
 				setTimeout(globalThis.onresize, 100)
@@ -135,9 +138,8 @@ function _a() {
 				clearInterval(tickPollTimer)
 				tickPollTimer = null
 			}
-			_currentMatchIndex = parseInt(selectMatches.selectedOptions[0].dataset.index, 10)
-			activeMatchLog = replay.arenaResult.match[_currentMatchIndex]
-			matchCompleted = false
+			const currentMatchIndex = parseInt(selectMatches.selectedOptions[0].dataset.index)
+			activeMatchLog = replay.arenaResult.match[currentMatchIndex]
 			scoreBoard.parentElement.parentElement.style.display = 'none'
 			ticksCache = []
 
@@ -180,14 +182,14 @@ function _a() {
 			})
 
 			void activeMatchLog.log.awaitCompletion().then(async () => {
-				matchCompleted = true
+				matchCompleted[getCurrentMatchIndex()] = true
 				await pullGameplayTicks()
 				rebuildScoreboard()
 			})
 
 			function repeat() {
 				pullGameplayTicks().then(() => {
-					if (matchCompleted) {
+					if (matchCompleted[getCurrentMatchIndex()]) {
 						return
 					}
 					repeat()
@@ -219,8 +221,8 @@ function _a() {
 			const isFinished = slider.valueAsNumber === ticks.length - 1 || ticks.length === 0
 			buttonBack.disabled = slider.valueAsNumber === 0
 			buttonNext.disabled = isFinished
-			scoreBoard.parentElement.parentElement.style.display = matchCompleted && isFinished ? '' : 'none'
-			if (isFinished && play.value !== '▶' && matchCompleted) {
+			scoreBoard.parentElement.parentElement.style.display = matchCompleted[getCurrentMatchIndex()] && isFinished ? '' : 'none'
+			if (isFinished && play.value !== '▶' && matchCompleted[getCurrentMatchIndex()]) {
 				playToggled(undefined, true)
 			}
 			const tick = 0 <= logIndex && logIndex < ticks.length ? JSON.parse(JSON.stringify(ticks[logIndex])) : null
