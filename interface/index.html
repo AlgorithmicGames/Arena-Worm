@@ -18,6 +18,7 @@
 		<style>
 			:root {
 				--square-size: 20px;
+				--main-color: chartreuse;
 			}
 			html, body {
 				height: 100%;
@@ -40,7 +41,6 @@
 				height: 100%;
 				width: 100%;
 				top: 0;
-				color: chartreuse;
 				position: fixed;
 				left: 0;
 			}
@@ -79,8 +79,6 @@
 				padding: 8px 4px;
 			}
 			#controller button {
-				background: rgba(0, 0, 0, 0.85);
-				color: chartreuse;
 				border: 1px solid rgba(255, 255, 255, 0.25);
 				border-radius: 8px;
 				padding: 8px 10px;
@@ -173,12 +171,6 @@
 				font-size: xxx-large;
 				text-align: center;
 				background: rgba(0, 0, 0, 0.82);
-			}
-			#lock.engaged.booting {
-				color: rgba(200, 255, 120, 0.95);
-			}
-			#lock.engaged:not(.booting) {
-				color: chartreuse;
 			}
 		</style>
 		<script>
@@ -472,7 +464,7 @@
 			</div>
 			<div id="lock" class="engaged booting"><span>Waiting for arena…</span></div>
 		</div>
-		<p id="shrink-counter"></p>
+		<p id="shrink-counter" style="color: black"></p>
 		<div id="controller">
 			<button type="button" onclick="buttonPressed(this.innerHTML)">x+ (D or right arrow)</button>
 			<button type="button" onclick="buttonPressed(this.innerHTML)">x- (A or left arrow)</button>
