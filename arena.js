@@ -382,6 +382,9 @@ function updateDirection(participant) {
 	const solidWorm = participant.payload.worm
 	const direction = rotateDirection(solidWorm, getSelectedDirection(participant.payload.response))
 	let notAllowedDirection
+	if (!_settings.arena.threeDimensions && [Directions.UP, Directions.DOWN].includes(direction)) {
+		return
+	}
 	switch (solidWorm.direction) {
 		case Directions.FORWARD:
 			notAllowedDirection = Directions.BACKWARD
@@ -625,6 +628,7 @@ function tick() {
 		})
 		_participantPromises.push(new Promise((resolve) => participant.payload.wormUpdated = resolve))
 	})
+
 	Promise.allSettled(_participantPromises).then(() => {
 		const challengedSpaces = []
 		const borderCollisions = []
