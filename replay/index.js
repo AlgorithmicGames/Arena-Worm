@@ -50,7 +50,7 @@ function _a() {
 					matchLog.scores.forEach((score) => {
 						if (!dataRows[score.team]) {
 							dataRows[score.team] = [
-								'<tr style="color:' + replay.arenaResult.teams[score.team].color.RGB + ';"><td>' + score.team + '</td><td>' +
+								'<tr style="color:' + replay.arenaResult.teams[score.team].color.RGB + ';"><td>' + (score.team + 1) + '</td><td>' +
 								score.members[0].name + '</td>',
 								score.score,
 							]
