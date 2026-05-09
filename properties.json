@@ -5,7 +5,8 @@
 			"teams": { "min": 2, "max": 6 },
 			"participantsPerTeam": { "min": 1, "max": 1 }
 		},
-		"replay": "/replay/"
+		"replay": "/replay/",
+		"defaultHumanInterfaces": [{ "name": "Human", "url": "/interface/" }]
 	},
 	"settings": {
 		"arena": {
@@ -30,7 +31,7 @@
 			"apples": ["AppleLess", "Single", "FourSymmetry", "FourRandom_asymmetric", "OneRandomPerWorm_asymmetric"],
 			"defeatedWorms": ["Disappears", "Eatable", "Solid"],
 			"winner": ["LastWormStanding", "MostPoints"],
-			"bonusToLonger": false,
+			"bonusToLonger": true,
 			"_meta": {
 				"startLength": { "min": 1, "max": null, "step": 1 },
 				"apples": { "default": "FourSymmetry", "comment": { "message": "<b>AppleLess:</b><br>Sets rules.startLength to infinity and border.movesPerArenaShrink to -1.<br><b>FourSymmetry:</b><br>When one is eaten, all get renewed.<br><b>FourRandom_asymmetric:</b><br>When one is eaten, all get renewed.<br><b>OneRandomPerWorm_asymmetric:</b><br>When one is eaten, only it get renewed." } },

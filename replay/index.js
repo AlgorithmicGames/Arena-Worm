@@ -1,40 +1,38 @@
 'use strict'
-function a() {
+function _a() {
 	function rotateArray(array) {
-		let result = []
+		const result = []
 		for (let i = array[0].length - 1; 0 <= i; i--) {
-			let row = array.map((e) => e[i])
+			const row = array.map((e) => e[i])
 			result.push(row)
 		}
 		return result
 	}
 	ReplayHelper.init((replay) => {
 		let playStarted = null
-		let controller = document.getElementById('controller')
-		let slider = document.getElementById('slider')
-		let slider_rotateX = document.getElementById('slider-rotateX')
-		let slider_rotateZ = document.getElementById('slider-rotateZ')
-		let buttonBack = document.getElementById('step-back')
-		let buttonNext = document.getElementById('step-next')
-		let gameboard = document.getElementById('gameboard')
-		let layerWrapper = document.getElementById('layer-wrapper')
-		let scoreBoard = document.getElementById('score-board')
-		let selectMatches = document.getElementById('matches')
-		let play = document.getElementById('play')
-		let _currentMatchIndex = 0
+		const controller = document.getElementById('controller')
+		const slider = document.getElementById('slider')
+		const slider_rotateX = document.getElementById('slider-rotateX')
+		const slider_rotateZ = document.getElementById('slider-rotateZ')
+		const buttonBack = document.getElementById('step-back')
+		const buttonNext = document.getElementById('step-next')
+		const gameboard = document.getElementById('gameboard')
+		const layerWrapper = document.getElementById('layer-wrapper')
+		const scoreBoard = document.getElementById('score-board')
+		const selectMatches = document.getElementById('matches')
+		const play = document.getElementById('play')
+		const matchCompleted = []
 		let activeMatchLog = null
 		let ticksCache = []
-		let rawLogSynced = 0
 		let tickPollTimer = null
 		let threeDDocumentListenersAttached = false
 		let dragPos = null
-		let matchCompleted = false
 		const bestOfRaw = replay.arenaResult.settings?.general?.bestOf
 		const bestOfCount = Number.isFinite(Number(bestOfRaw)) && Number(bestOfRaw) >= 1 ? Math.floor(Number(bestOfRaw)) : 1
 
 		function rebuildScoreboard() {
 			let scoreBoardString = ''
-			let matchLogErrors = replay.arenaResult.match.filter((l) => l.error)
+			const matchLogErrors = replay.arenaResult.match.filter((l) => l.error)
 			if (matchLogErrors.length) {
 				scoreBoard.parentElement.parentElement.style.display = ''
 				scoreBoardString = '<b style="color: red">Aborted</b><br>'
@@ -45,7 +43,7 @@ function a() {
 			}
 			scoreBoardString += '<div style="text-align: center; font-style: italic;">' + (replay.arenaResult.result.partialResult ? 'Partial result' : 'Result') +
 				'</div><table><tr><th>Team</th><th>Participant</th>'
-			let dataRows = []
+			const dataRows = []
 			replay.arenaResult.match.forEach((matchLog, index) => {
 				if (matchLog.scores) {
 					scoreBoardString += '<th>' + (1 < replay.arenaResult.match.length ? 'Match ' + (index + 1) : 'Score') + '</th>'
@@ -77,35 +75,50 @@ function a() {
 
 		void replay.onAbort.then(() => rebuildScoreboard())
 
-		async function pullGameplayTicks() {
-			if (!activeMatchLog) return
-			const total = await activeMatchLog.log.count()
-			while (rawLogSynced < total) {
-				const entry = await activeMatchLog.log.get(rawLogSynced)
-				rawLogSynced++
-				if (entry && entry.type === 'tick') {
-					ticksCache.push(entry)
+		let promiseQueue = Promise.resolve()
+		function pullGameplayTicks() {
+			return promiseQueue = promiseQueue.then(async () => {
+				if (!activeMatchLog) return
+				const total = await activeMatchLog.log.count()
+				while (ticksCache.length < total) {
+					const entry = await activeMatchLog.log.get(ticksCache.length)
+					if (entry && entry.type === 'tick') {
+						ticksCache.push(entry)
+					}
 				}
-			}
-			const maxTickIndex = ticksCache.length === 0 ? 0 : ticksCache.length - 1
-			slider.max = maxTickIndex
-			if (slider.valueAsNumber > maxTickIndex) {
-				slider.valueAsNumber = maxTickIndex
+				const maxTickIndex = ticksCache.length === 0 ? 0 : ticksCache.length - 1
+				slider.max = maxTickIndex
+				if (slider.valueAsNumber > maxTickIndex) {
+					slider.valueAsNumber = maxTickIndex
+				}
+			})
+		}
+
+		function angleChange() {
+			layerWrapper.style.transform = 'rotateX(' + slider_rotateX.value + 'deg) rotateZ(' + -slider_rotateZ.value + 'deg)'
+		}
+		function updateDragPos(mouseEvent) {
+			if (![slider, slider_rotateX, slider_rotateZ].includes(mouseEvent.srcElement)) {
+				dragPos = { x: mouseEvent.pageX, y: mouseEvent.pageY }
 			}
 		}
 
-		window.onresize = () => {
+		function getCurrentMatchIndex() {
+			return replay.arenaResult.match.findIndex((match) => match === activeMatchLog)
+		}
+
+		globalThis.onresize = () => {
 			if (gameboard.offsetWidth === 0) {
-				setTimeout(window.onresize, 100)
+				setTimeout(globalThis.onresize, 100)
 				return
 			}
 			gameboard.parentElement.style.margin = ''
 			gameboard.style.zoom = 1
-			let bodyMargin = parseFloat(window.getComputedStyle(document.body, null).getPropertyValue('margin-top')) +
-				parseFloat(window.getComputedStyle(document.body, null).getPropertyValue('margin-bottom'))
-			let wrapperHeight = window.innerHeight - parseFloat(window.getComputedStyle(controller, null).getPropertyValue('height')) - bodyMargin
-			let wrapperSize = gameboard.parentElement.offsetWidth < wrapperHeight ? gameboard.parentElement.offsetWidth : wrapperHeight
-			let zoom = wrapperSize / gameboard.offsetWidth
+			const bodyMargin = parseFloat(globalThis.getComputedStyle(document.body, null).getPropertyValue('margin-top')) +
+				parseFloat(globalThis.getComputedStyle(document.body, null).getPropertyValue('margin-bottom'))
+			const wrapperHeight = globalThis.innerHeight - parseFloat(globalThis.getComputedStyle(controller, null).getPropertyValue('height')) - bodyMargin
+			const wrapperSize = gameboard.parentElement.offsetWidth < wrapperHeight ? gameboard.parentElement.offsetWidth : wrapperHeight
+			const zoom = wrapperSize / gameboard.offsetWidth
 			gameboard.style.zoom = zoom * (replay.arenaResult.settings.arena.threeDimensions ? .5 : .9)
 			gameboard.parentElement.style.margin = 'auto'
 		}
@@ -125,30 +138,20 @@ function a() {
 				clearInterval(tickPollTimer)
 				tickPollTimer = null
 			}
-			_currentMatchIndex = parseInt(selectMatches.selectedOptions[0].dataset.index, 10)
-			activeMatchLog = replay.arenaResult.match[_currentMatchIndex]
-			matchCompleted = false
+			const currentMatchIndex = parseInt(selectMatches.selectedOptions[0].dataset.index)
+			activeMatchLog = replay.arenaResult.match[currentMatchIndex]
 			scoreBoard.parentElement.parentElement.style.display = 'none'
 			ticksCache = []
-			rawLogSynced = 0
 
 			if (replay.arenaResult.settings.arena.threeDimensions) {
-				function angleChange() {
-					layerWrapper.style.transform = 'rotateX(' + slider_rotateX.value + 'deg) rotateZ(' + -slider_rotateZ.value + 'deg)'
-				}
-				function updateDragPos(mouseEvent) {
-					if (![slider, slider_rotateX, slider_rotateZ].includes(mouseEvent.srcElement)) {
-						dragPos = { x: mouseEvent.pageX, y: mouseEvent.pageY }
-					}
-				}
 				if (!threeDDocumentListenersAttached) {
 					threeDDocumentListenersAttached = true
 					document.addEventListener('mousedown', updateDragPos)
 					document.addEventListener('mouseup', () => dragPos = null)
 					document.addEventListener('mousemove', (mouseEvent) => {
 						if (dragPos) {
-							let deltaX = dragPos.x - mouseEvent.pageX
-							let deltaY = dragPos.y - mouseEvent.pageY
+							const deltaX = dragPos.x - mouseEvent.pageX
+							const deltaY = dragPos.y - mouseEvent.pageY
 							updateDragPos(mouseEvent)
 							slider_rotateX.valueAsNumber += deltaY
 							slider_rotateZ.valueAsNumber -= deltaX
@@ -179,14 +182,14 @@ function a() {
 			})
 
 			void activeMatchLog.log.awaitCompletion().then(async () => {
-				matchCompleted = true
+				matchCompleted[getCurrentMatchIndex()] = true
 				await pullGameplayTicks()
 				rebuildScoreboard()
 			})
 
 			function repeat() {
 				pullGameplayTicks().then(() => {
-					if (matchCompleted) {
+					if (matchCompleted[getCurrentMatchIndex()]) {
 						return
 					}
 					repeat()
@@ -198,10 +201,10 @@ function a() {
 		function startPlayback() {
 			play.value = '❚❚'
 			playStarted = Date.now()
-			window.onresize()
+			globalThis.onresize()
 		}
 
-		function playToggled(mouseEvent, stop = false) {
+		function playToggled(_mouseEvent, stop = false) {
 			if (stop || play.value !== '▶') {
 				play.value = '▶'
 				playStarted = null
@@ -211,32 +214,32 @@ function a() {
 				}
 				startPlayback()
 			}
-			window.onresize()
+			globalThis.onresize()
 		}
 		function setTick(logIndex = -1) {
-			let ticks = ticksCache
-			let isFinished = slider.valueAsNumber === ticks.length - 1 || ticks.length === 0
+			const ticks = ticksCache
+			const isFinished = slider.valueAsNumber === ticks.length - 1 || ticks.length === 0
 			buttonBack.disabled = slider.valueAsNumber === 0
 			buttonNext.disabled = isFinished
-			scoreBoard.parentElement.parentElement.style.display = matchCompleted && isFinished ? '' : 'none'
-			if (isFinished && play.value !== '▶' && matchCompleted) {
+			scoreBoard.parentElement.parentElement.style.display = matchCompleted[getCurrentMatchIndex()] && isFinished ? '' : 'none'
+			if (isFinished && play.value !== '▶' && matchCompleted[getCurrentMatchIndex()]) {
 				playToggled(undefined, true)
 			}
-			let tick = 0 <= logIndex && logIndex < ticks.length ? JSON.parse(JSON.stringify(ticks[logIndex])) : null
+			const tick = 0 <= logIndex && logIndex < ticks.length ? JSON.parse(JSON.stringify(ticks[logIndex])) : null
 			while (layerWrapper.firstChild) {
 				layerWrapper.removeChild(layerWrapper.lastChild)
 			}
 			if (tick) {
 				if (replay.arenaResult.settings.arena.threeDimensions) {
 					;['north', 'south', 'east', 'west'].forEach((side) => {
-						let wall = document.createElement('div')
+						const wall = document.createElement('div')
 						wall.id = 'gameboard-wall-' + side
 						wall.classList.add('gameboard-wall')
 						layerWrapper.appendChild(wall)
 					})
 				}
 				;[...tick.value].reverse().forEach((srcLayer) => {
-					let layer = document.createElement('div')
+					const layer = document.createElement('div')
 					layer.classList.add('layer')
 					if (replay.arenaResult.settings.rules.defeatedWorms === 'Solid') {
 						layer.classList.add('defeatedWorms_Solid')
@@ -246,7 +249,7 @@ function a() {
 					rotateArray(srcLayer).forEach((srcColumn, columIndex) => {
 						gridTemplateColumns += 'auto '
 						srcColumn.forEach((spaceData, rowIndex) => {
-							let space = document.createElement('div')
+							const space = document.createElement('div')
 							space.classList.add('space')
 							if (rowIndex === 0) {
 								space.classList.add('space-border-left')
@@ -255,7 +258,7 @@ function a() {
 								space.classList.add('space-border-bottom')
 							}
 							spaceData.grave.forEach((part) => {
-								let spaceContent = document.createElement('div')
+								const spaceContent = document.createElement('div')
 								spaceContent.classList.add('space-content')
 								spaceContent.classList.add('type-Grave')
 								spaceContent.classList.add('type-' + part.type)
@@ -266,7 +269,7 @@ function a() {
 							if (spaceData.occupiedBy !== null) {
 								space.classList.add('type-' + spaceData.occupiedBy.type)
 								if (spaceData.occupiedBy.type !== 'Wall') {
-									let spaceContent = document.createElement('div')
+									const spaceContent = document.createElement('div')
 									spaceContent.classList.add('space-content')
 									spaceContent.innerHTML = spaceData.occupiedBy.team + 1
 									spaceContent.classList.add('worm')
@@ -275,7 +278,7 @@ function a() {
 								}
 							}
 							if (spaceData.eatables.apple || 0 < spaceData.eatables.other) {
-								let spaceContent = document.createElement('div')
+								const spaceContent = document.createElement('div')
 								spaceContent.classList.add('space-content')
 								spaceContent.classList.add('eatable')
 								if (spaceData.eatables.apple) {
@@ -342,7 +345,7 @@ function a() {
 										],
 									},
 								].forEach((w) => {
-									let wall = document.getElementById('gameboard-wall-' + w.side)
+									const wall = document.getElementById('gameboard-wall-' + w.side)
 									w.style.forEach((style) => {
 										wall.style[style.key] = style.value
 									})
@@ -362,17 +365,17 @@ function a() {
 		function playFrame() {
 			if (play.value !== '▶') {
 				if (250 < Date.now() - playStarted) {
-					let ticks = ticksCache
-					let canStepForward = ticks.length > 0 && slider.valueAsNumber < ticks.length - 1
+					const ticks = ticksCache
+					const canStepForward = ticks.length > 0 && slider.valueAsNumber < ticks.length - 1
 					if (canStepForward) {
 						step({ target: buttonNext })
 					}
 					playStarted = Date.now()
 				}
 			}
-			window.requestAnimationFrame(playFrame)
+			globalThis.requestAnimationFrame(playFrame)
 		}
-		window.requestAnimationFrame(playFrame)
+		globalThis.requestAnimationFrame(playFrame)
 
 		play.addEventListener('click', playToggled)
 		buttonBack.addEventListener('click', (mouseEvent) => {
@@ -391,7 +394,7 @@ function a() {
 			}
 		})
 		for (let i = 0; i < bestOfCount; i++) {
-			let option = document.createElement('option')
+			const option = document.createElement('option')
 			selectMatches.appendChild(option)
 			option.innerHTML = 'Match ' + (i + 1)
 			option.disabled = true
