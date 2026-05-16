@@ -14,7 +14,7 @@
 		</script>
 		<meta content="width=device-width, initial-scale=1.0" name="viewport">
 		<meta content="yes" name="mobile-web-app-capable">
-		<link rel="stylesheet" href="/global.css">
+		<script src="/InterfaceHelper.js"></script>
 		<style>
 			:root {
 				--square-size: 20px;
@@ -406,7 +406,7 @@
 						}
 					}
 				})
-				window.opener.postMessage(null, '*')
+				InterfaceHelper.signalReady()
 			}
 			function buttonPressed(direction) {
 				if (!_responseLock.classList.contains('engaged')) {
@@ -414,13 +414,10 @@
 					const label = _responseLock.querySelector('span')
 					if (label) label.textContent = 'Awaiting update'
 					const value = direction.split(' ')[0]
-					window.opener.postMessage({
-						type: 'Response',
-						response: {
-							value,
-							executionSteps: { toRespond: 0, toTerminate: 0 },
-						},
-					}, '*')
+					InterfaceHelper.respond({
+						value,
+						executionSteps: { toRespond: 0, toTerminate: 0 },
+					})
 				}
 			}
 			document.addEventListener('keydown', (keyboardEvent) => {
@@ -464,7 +461,7 @@
 			</div>
 			<div id="lock" class="engaged booting"><span>Waiting for arena…</span></div>
 		</div>
-		<p id="shrink-counter" style="color: black"></p>
+		<p id="shrink-counter"></p>
 		<div id="controller">
 			<button type="button" onclick="buttonPressed(this.innerHTML)">x+ (D or right arrow)</button>
 			<button type="button" onclick="buttonPressed(this.innerHTML)">x- (A or left arrow)</button>
