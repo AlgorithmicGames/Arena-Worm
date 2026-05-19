@@ -619,14 +619,15 @@ function tick() {
 		}
 		const participant = solidWorm.getParticipant()
 		participant.payload.response = null
-		participant.postMessage(arenaClone).then((response) => {
-			if (response.message) {
-				participant.payload.response = response.message.data
-				updateDirection(participant)
-			}
-			participant.payload.wormUpdated()
-		})
-		_participantPromises.push(new Promise((resolve) => participant.payload.wormUpdated = resolve))
+
+		_participantPromises.push(
+			participant.payload.worker.postMessage(arenaClone).then((response) => {
+				if (response.message) {
+					participant.payload.response = response.message.data
+					updateDirection(participant)
+				}
+			}),
+		)
 	})
 
 	Promise.allSettled(_participantPromises).then(() => {
@@ -793,6 +794,16 @@ ArenaHelper.init = (participants, settings) => {
 			}
 		})
 		_worms_lastLength = _worms.length
-		tick()
+		const workerInitPromises = []
+		_participants.forEach((participant) => {
+			workerInitPromises.push(
+				participant.addWorker().then((worker) => {
+					participant.payload.worker = worker
+				}),
+			)
+		})
+		Promise.allSettled(workerInitPromises).then(() => {
+			tick()
+		})
 	}
 }
