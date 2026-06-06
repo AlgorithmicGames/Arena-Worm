@@ -50,7 +50,7 @@ class Controllable extends Placeable {
 		const BODY = body
 		super(space, team)
 		if (this.constructor.name === 'Controllable') {
-			ArenaHelper.postAbort('', 'Controllable is not constructable.')
+			throw new Error('Controllable is not constructable.')
 		}
 		if (this.constructor.name === 'SolidWorm') {
 			BODY.push(this)
@@ -82,7 +82,7 @@ class SolidWorm extends Controllable {
 		this.getWormIndex = () => {
 			const index = _worms.indexOf(this)
 			if (index === -1) {
-				ArenaHelper.postAbort('', 'SolidWorm not in list.')
+				throw new Error('SolidWorm not in list.')
 			}
 			return index
 		}
@@ -244,7 +244,7 @@ function getPos(solidWorm) {
 			}
 		}
 	}
-	ArenaHelper.postAbort('', 'Position of SolidWorm:' + solidWorm.TEAM + ' not found.')
+	throw new Error('Position of SolidWorm:' + solidWorm.TEAM + ' not found.')
 }
 function getNextPos(pos, direction) {
 	pos = JSON.parse(JSON.stringify(pos))
@@ -706,21 +706,21 @@ function rotateArray(array) {
 	}
 	return result
 }
-ArenaHelper.init = (participants, settings) => {
+ArenaHelper.init = ({ participants, settings, reject }) => {
 	_participants = participants
 	_settings = settings
 	if (_settings.arena.size % 2 !== 1) {
-		ArenaHelper.postAbort('', 'Arena size has to be uneven.')
+		reject('Arena size has to be uneven.')
 	} else if (_settings.rules.winner === 'MostPoints' && _settings.rules.defeatedWorms !== 'Solid') {
-		ArenaHelper.postAbort('', 'Incompatible rules: MostPoints can only be played with Solid.')
+		reject('Incompatible rules: MostPoints can only be played with Solid.')
 	} else if (!_settings.arena.threeDimensions && 4 < _participants.countTeams()) {
-		ArenaHelper.postAbort('', '`threeDimensions` is required for more than 4 participants.')
+		reject('`threeDimensions` is required for more than 4 participants.')
 	} else if (4 < _participants.countTeams() && ['FourSymmetry', 'FourRandom_asymmetric'].includes(_settings.rules.apples)) {
-		ArenaHelper.postAbort('', 'Can not play `FourSymmetry` or `FourRandom_asymmetric` with more than 4 participants.')
+		reject('Can not play `FourSymmetry` or `FourRandom_asymmetric` with more than 4 participants.')
 	} else if (4 < _participants.countTeams() && _settings.border.shrinkMode === 'RandomPlacedWall_fourSymmetry') {
-		ArenaHelper.postAbort('', 'RandomPlacedWall_fourSymmetry not symmetric with arena.threeDimensions.')
+		reject('RandomPlacedWall_fourSymmetry not symmetric with arena.threeDimensions.')
 	} else if (_settings.border.shrinkMode === 'WallOuterArea' && _settings.border.noOuterBorder) {
-		ArenaHelper.postAbort('', 'WallOuterArea is not compatible with noOuterBorder.')
+		reject('WallOuterArea is not compatible with noOuterBorder.')
 	} else {
 		const shrinkSetting = _settings.rules.apples === 'AppleLess' ? -1 : _settings.border.movesPerArenaShrink
 		if (shrinkSetting < 0) {
