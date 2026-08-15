@@ -5,130 +5,134 @@
 		<title>Replay</title>
 		<script async src="https://www.googletagmanager.com/gtag/js?id=G-TJFMG29186"></script>
 		<script>
-			window.dataLayer = window.dataLayer || []
-			function gtag() {
-				dataLayer.push(arguments)
-			}
-			gtag('js', new Date())
-			gtag('config', 'G-TJFMG29186')
+		window.dataLayer = window.dataLayer || []
+		function gtag() {
+			dataLayer.push(arguments)
+		}
+		gtag('js', new Date())
+		gtag('config', 'G-TJFMG29186')
 		</script>
 		<meta content="width=device-width, initial-scale=1.0" name="viewport">
 		<meta content="yes" name="mobile-web-app-capable">
 		<style>
-			:root {
-				--square-size: 20px;
-			}
-			html, body {
-				height: 100%;
-				margin-top: 0;
-				margin-bottom: 0;
-			}
-			body {
-				display: grid;
-				text-align: center;
-				grid-template-rows: auto min-content;
-			}
+		:root {
+			--square-size: 20px;
+		}
+		html,
+		body {
+			height: 100%;
+			margin-top: 0;
+			margin-bottom: 0;
+		}
+		body {
+			display: grid;
+			text-align: center;
+			grid-template-rows: auto min-content;
+		}
 
-			#score-board-outer-wrapper {
-				height: 100%;
-				width: 100%;
-				top: 0;
-				color: chartreuse;
-				position: fixed;
-				left: 0;
-			}
-			#score-board-inner-wrapper {
-				display: flex;
-				height: 100%;
-				justify-content: center;
-				align-items: center;
-			}
-			#score-board {
-				border: 1px solid black;
-				background-color: rgba(0, 0, 0, 0.9);
-				border-radius: 25px;
-				padding: 15px;
-				text-align: left;
-			}
-			#score-board tr > th:not(:first-child), #score-board tr > td:not(:first-child) {
-				padding-left: 1em;
-			}
+		#score-board-outer-wrapper {
+			height: 100%;
+			width: 100%;
+			top: 0;
+			color: chartreuse;
+			position: fixed;
+			left: 0;
+		}
+		#score-board-inner-wrapper {
+			display: flex;
+			height: 100%;
+			justify-content: center;
+			align-items: center;
+		}
+		#score-board {
+			border: 1px solid black;
+			background-color: rgba(0, 0, 0, 0.9);
+			border-radius: 25px;
+			padding: 15px;
+			text-align: left;
+		}
+		#score-board tr > th:not(:first-child),
+		#score-board tr > td:not(:first-child) {
+			padding-left: 1em;
+		}
 
-			#gameboard {
-				cursor: default;
-				user-select: none;
-				display: inline-block;
-			}
+		#gameboard {
+			cursor: default;
+			user-select: none;
+			display: inline-block;
+		}
 
-			#controller {
-				width: 100%;
-				display: flex;
-				position: relative;
-				margin-bottom: 8px;
-			}
-			#slider, #slider-layer {
-				width: -webkit-fill-available;
-			}
+		#controller {
+			width: 100%;
+			display: flex;
+			position: relative;
+			margin-bottom: 8px;
+		}
+		#slider,
+		#slider-layer {
+			width: -webkit-fill-available;
+		}
 
-			.layer {
-				display: grid;
-				background-color: #ffffff07;
-				border-width: 0.5px;
-				border-style: solid;
-				border-color: rgba(0, 0, 0, 0.2);
-			}
-			.wrapped .layer {
-				border-color: rgba(255, 255, 255, 0.2);
-			}
-			.layer:last-child, .gameboard-wall {
-				background-color: whitesmoke;
-			}
-			.gameboard-wall {
-				opacity: 0.5;
-				position: absolute;
-				backface-visibility: hidden;
-			}
+		.layer {
+			display: grid;
+			background-color: #ffffff07;
+			border-width: 0.5px;
+			border-style: solid;
+			border-color: rgba(0, 0, 0, 0.2);
+		}
+		.wrapped .layer {
+			border-color: rgba(255, 255, 255, 0.2);
+		}
+		.layer:last-child,
+		.gameboard-wall {
+			background-color: whitesmoke;
+		}
+		.gameboard-wall {
+			opacity: 0.5;
+			position: absolute;
+			backface-visibility: hidden;
+		}
 
-			.space {
-				border-width: 0.5px;
-				border-style: solid;
-				border-color: rgba(0, 0, 0, 0.2);
-				text-align: center;
-				width: var(--square-size);
-				height: var(--square-size);
-			}
+		.space {
+			border-width: 0.5px;
+			border-style: solid;
+			border-color: rgba(0, 0, 0, 0.2);
+			text-align: center;
+			width: var(--square-size);
+			height: var(--square-size);
+		}
 
-			.space-content:not(.eatable) {
-				height: 0;
-			}
-			.eatable {
-				border-radius: 50%;
-				background-color: lightgreen;
-			}
-			.type-Wall > .eatable {
-				display: none;
-			}
+		.space-content:not(.eatable) {
+			height: 0;
+		}
+		.eatable {
+			border-radius: 50%;
+			background-color: lightgreen;
+		}
+		.type-Wall > .eatable {
+			display: none;
+		}
 
-			.type-SolidWorm {
-				font-weight: bold;
-			}
+		.type-SolidWorm {
+			font-weight: bold;
+		}
 
-			.type-Wall {
-				background-color: #0000007f;
-			}
-			.type-Grave {
-				filter: grayscale(100%);
-			}
-			.defeatedWorms_Solid .type-Grave {
-				filter: unset;
-			}
+		.type-Wall {
+			background-color: #0000007f;
+		}
+		.type-Grave {
+			filter: grayscale(100%);
+		}
+		.defeatedWorms_Solid .type-Grave {
+			filter: unset;
+		}
 
-			#gameboard.threeDimensions {
-				perspective: 100vmax;
-			}
-			#gameboard.threeDimensions > * {
-				transform-style: preserve-3d;
-			}
+		#gameboard.threeDimensions {
+			perspective: 100vmax;
+		}
+		#gameboard.threeDimensions > * {
+			transform-style: preserve-3d;
+		}
 		</style>
 		<script src="/ReplayHelper.js"></script>
 		<script src="index.js"></script>

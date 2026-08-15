@@ -75,13 +75,14 @@ function _a() {
 
 		void replay.onAbort.then(() => rebuildScoreboard())
 
+		let logCount = 0
 		let promiseQueue = Promise.resolve()
 		function pullGameplayTicks() {
 			return promiseQueue = promiseQueue.then(async () => {
 				if (!activeMatchLog) return
 				const total = await activeMatchLog.log.count()
-				while (ticksCache.length < total) {
-					const entry = await activeMatchLog.log.get(ticksCache.length)
+				while (logCount < total) {
+					const entry = await activeMatchLog.log.get(logCount++)
 					if (entry && entry.type === 'tick') {
 						ticksCache.push(entry)
 					}

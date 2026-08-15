@@ -5,459 +5,463 @@
 		<title>Human interface for Worm @ Algorithmic Games</title>
 		<script async src="https://www.googletagmanager.com/gtag/js?id=G-TJFMG29186"></script>
 		<script>
-			window.dataLayer = window.dataLayer || []
-			function gtag() {
-				dataLayer.push(arguments)
-			}
-			gtag('js', new Date())
-			gtag('config', 'G-TJFMG29186')
+		window.dataLayer = window.dataLayer || []
+		function gtag() {
+			dataLayer.push(arguments)
+		}
+		gtag('js', new Date())
+		gtag('config', 'G-TJFMG29186')
 		</script>
 		<meta content="width=device-width, initial-scale=1.0" name="viewport">
 		<meta content="yes" name="mobile-web-app-capable">
 		<script src="/InterfaceHelper.js"></script>
 		<style>
-			:root {
-				--square-size: 20px;
-				--main-color: chartreuse;
-			}
-			html, body {
-				height: 100%;
-				margin-top: 0;
-				margin-bottom: 0;
-			}
-			body {
-				display: grid;
-				text-align: center;
-				grid-template-rows: auto min-content min-content;
-			}
+		:root {
+			--square-size: 20px;
+			--main-color: chartreuse;
+		}
+		html,
+		body {
+			height: 100%;
+			margin-top: 0;
+			margin-bottom: 0;
+		}
+		body {
+			display: grid;
+			text-align: center;
+			grid-template-rows: auto min-content min-content;
+		}
 
-			#gameboard-wrapper {
-				position: relative;
-				min-height: 0;
-				width: 100%;
-			}
+		#gameboard-wrapper {
+			position: relative;
+			min-height: 0;
+			width: 100%;
+		}
 
-			#score-board-outer-wrapper {
-				height: 100%;
-				width: 100%;
-				top: 0;
-				position: fixed;
-				left: 0;
-			}
-			#score-board-inner-wrapper {
-				display: flex;
-				height: 100%;
-				justify-content: center;
-				align-items: center;
-			}
-			#score-board {
-				border: 1px solid black;
-				background-color: rgba(0, 0, 0, 0.9);
-				border-radius: 25px;
-				padding: 15px;
-				text-align: left;
-			}
-			#score-board tr > th:not(:first-child), #score-board tr > td:not(:first-child) {
-				padding-left: 1em;
-			}
+		#score-board-outer-wrapper {
+			height: 100%;
+			width: 100%;
+			top: 0;
+			position: fixed;
+			left: 0;
+		}
+		#score-board-inner-wrapper {
+			display: flex;
+			height: 100%;
+			justify-content: center;
+			align-items: center;
+		}
+		#score-board {
+			border: 1px solid black;
+			background-color: rgba(0, 0, 0, 0.9);
+			border-radius: 25px;
+			padding: 15px;
+			text-align: left;
+		}
+		#score-board tr > th:not(:first-child),
+		#score-board tr > td:not(:first-child) {
+			padding-left: 1em;
+		}
 
-			#gameboard {
-				position: relative;
-				cursor: default;
-				user-select: none;
-				display: inline-block;
-			}
+		#gameboard {
+			position: relative;
+			cursor: default;
+			user-select: none;
+			display: inline-block;
+		}
 
-			#controller {
-				width: 100%;
-				display: flex;
-				flex-wrap: wrap;
-				gap: 6px;
-				justify-content: center;
-				position: relative;
-				margin-bottom: 8px;
-				padding: 8px 4px;
-			}
-			#controller button {
-				border: 1px solid rgba(255, 255, 255, 0.25);
-				border-radius: 8px;
-				padding: 8px 10px;
-				cursor: pointer;
-			}
-			#controller button:hover {
-				border-color: rgba(255, 255, 255, 0.45);
-			}
-			#controller button:active {
-				opacity: 0.9;
-			}
-			#slider, #slider-layer {
-				width: -webkit-fill-available;
-			}
+		#controller {
+			width: 100%;
+			display: flex;
+			flex-wrap: wrap;
+			gap: 6px;
+			justify-content: center;
+			position: relative;
+			margin-bottom: 8px;
+			padding: 8px 4px;
+		}
+		#controller button {
+			border: 1px solid rgba(255, 255, 255, 0.25);
+			border-radius: 8px;
+			padding: 8px 10px;
+			cursor: pointer;
+		}
+		#controller button:hover {
+			border-color: rgba(255, 255, 255, 0.45);
+		}
+		#controller button:active {
+			opacity: 0.9;
+		}
+		#slider,
+		#slider-layer {
+			width: -webkit-fill-available;
+		}
 
-			.layer {
-				display: grid;
-				background-color: #ffffff07;
-				border-width: 0.5px;
-				border-style: solid;
-				border-color: rgba(0, 0, 0, 0.2);
-				width: fit-content;
-			}
-			.wrapped .layer {
-				border-color: rgba(255, 255, 255, 0.2);
-			}
-			.layer:last-child, .gameboard-wall {
-				background-color: whitesmoke;
-			}
-			.gameboard-wall {
-				opacity: 0.5;
-				position: absolute;
-				backface-visibility: hidden;
-			}
+		.layer {
+			display: grid;
+			background-color: #ffffff07;
+			border-width: 0.5px;
+			border-style: solid;
+			border-color: rgba(0, 0, 0, 0.2);
+			width: fit-content;
+		}
+		.wrapped .layer {
+			border-color: rgba(255, 255, 255, 0.2);
+		}
+		.layer:last-child,
+		.gameboard-wall {
+			background-color: whitesmoke;
+		}
+		.gameboard-wall {
+			opacity: 0.5;
+			position: absolute;
+			backface-visibility: hidden;
+		}
 
-			.space {
-				border-width: 0.5px;
-				border-style: solid;
-				border-color: rgba(0, 0, 0, 0.2);
-				text-align: center;
-				width: var(--square-size);
-				height: var(--square-size);
-			}
+		.space {
+			border-width: 0.5px;
+			border-style: solid;
+			border-color: rgba(0, 0, 0, 0.2);
+			text-align: center;
+			width: var(--square-size);
+			height: var(--square-size);
+		}
 
-			.space-content:not(.eatable) {
-				height: 0;
-			}
-			.eatable {
-				border-radius: 50%;
-				background-color: lightgreen;
-			}
-			.type-Wall > .eatable {
-				display: none;
-			}
+		.space-content:not(.eatable) {
+			height: 0;
+		}
+		.eatable {
+			border-radius: 50%;
+			background-color: lightgreen;
+		}
+		.type-Wall > .eatable {
+			display: none;
+		}
 
-			.type-SolidWorm {
-				font-weight: bold;
-			}
+		.type-SolidWorm {
+			font-weight: bold;
+		}
 
-			.type-Wall {
-				background-color: #0000007f;
-			}
-			.type-Grave {
-				filter: grayscale(100%);
-			}
-			.defeatedWorms_Solid .type-Grave {
-				filter: unset;
-			}
+		.type-Wall {
+			background-color: #0000007f;
+		}
+		.type-Grave {
+			filter: grayscale(100%);
+		}
+		.defeatedWorms_Solid .type-Grave {
+			filter: unset;
+		}
 
-			#gameboard.threeDimensions {
-				perspective: 100vmax;
-			}
-			#gameboard.threeDimensions > * {
-				transform-style: preserve-3d;
-			}
-			#lock {
-				display: none;
-			}
-			#gameboard-wrapper:has(#lock.booting) {
-				min-height: min(42vh, 360px);
-			}
-			#lock.engaged {
-				justify-content: center;
-				align-items: center;
-				position: absolute;
-				inset: 0;
-				display: flex;
-				z-index: 9999;
-				box-sizing: border-box;
-				font-size: xxx-large;
-				text-align: center;
-				background: rgba(0, 0, 0, 0.82);
-			}
+		#gameboard.threeDimensions {
+			perspective: 100vmax;
+		}
+		#gameboard.threeDimensions > * {
+			transform-style: preserve-3d;
+		}
+		#lock {
+			display: none;
+		}
+		#gameboard-wrapper:has(#lock.booting) {
+			min-height: min(42vh, 360px);
+		}
+		#lock.engaged {
+			justify-content: center;
+			align-items: center;
+			position: absolute;
+			inset: 0;
+			display: flex;
+			z-index: 9999;
+			box-sizing: border-box;
+			font-size: xxx-large;
+			text-align: center;
+			background: rgba(0, 0, 0, 0.82);
+		}
 		</style>
 		<script>
-			'use strict'
-			let _responseLock
-			let _init
-			let _shrinkOnTick
-			let _tick = 0
-			let humanWorker = null
-			function a() {
-				_responseLock = document.getElementById('lock')
-				const gameboard = document.getElementById('gameboard')
-				const gameboardWrapper = document.getElementById('gameboard-wrapper')
-				const controller = document.getElementById('controller')
-				/** Team hues match `ReplayHelper` replay defaults (`#getColor`). */
-				function hslIndexToRgbHex(index, total) {
-					const offset = total % 1 ? 0.5 : 2 / 3
-					const hue = ((total ? index / total : index) + offset) % 1
-					const saturation = 1
-					const lightness = 0.5
-					const q = lightness < 0.5 ? lightness * (1 + saturation) : lightness + saturation - lightness * saturation
-					const p = 2 * lightness - q
-					function hueToRGB(t) {
-						if (t < 0) t += 1
-						if (1 < t) t -= 1
-						if (t < 1 / 6) return p + (q - p) * 6 * t
-						if (t < 1 / 2) return q
-						if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6
-						return p
-					}
-					const R = hueToRGB(hue + 1 / 3)
-					const G = hueToRGB(hue)
-					const B = hueToRGB(hue - 1 / 3)
-					const toHex = (c) => {
-						const n = Math.round(255 * c).toString(16)
-						return n.length === 1 ? '0' + n : n
-					}
-					return '#' + toHex(R) + toHex(G) + toHex(B)
+		'use strict'
+		let _responseLock
+		let _init
+		let _shrinkOnTick
+		let _tick = 0
+		let humanWorker = null
+		function a() {
+			_responseLock = document.getElementById('lock')
+			const gameboard = document.getElementById('gameboard')
+			const gameboardWrapper = document.getElementById('gameboard-wrapper')
+			const controller = document.getElementById('controller')
+			/** Team hues match `ReplayHelper` replay defaults (`#getColor`). */
+			function hslIndexToRgbHex(index, total) {
+				const offset = total % 1 ? 0.5 : 2 / 3
+				const hue = ((total ? index / total : index) + offset) % 1
+				const saturation = 1
+				const lightness = 0.5
+				const q = lightness < 0.5 ? lightness * (1 + saturation) : lightness + saturation - lightness * saturation
+				const p = 2 * lightness - q
+				function hueToRGB(t) {
+					if (t < 0) t += 1
+					if (1 < t) t -= 1
+					if (t < 1 / 6) return p + (q - p) * 6 * t
+					if (t < 1 / 2) return q
+					if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6
+					return p
 				}
-				function teamRgbHex(teamIndex, teamCount, onlySingleTeams) {
-					let idx = teamIndex
-					let total = teamCount
-					if (idx === 1 && total === 2 && onlySingleTeams) {
-						idx = 1
-						total = 3
-					}
-					return hslIndexToRgbHex(idx, total)
+				const R = hueToRGB(hue + 1 / 3)
+				const G = hueToRGB(hue)
+				const B = hueToRGB(hue - 1 / 3)
+				const toHex = (c) => {
+					const n = Math.round(255 * c).toString(16)
+					return n.length === 1 ? '0' + n : n
 				}
-				function metaFromInit(init) {
-					const opponents = init?.opponents
-					const teamCount = Array.isArray(opponents) && opponents.length > 0 ? opponents.length : 2
-					const onlySingleTeams = Array.isArray(opponents) &&
-						opponents.every((o) => o === null || (Array.isArray(o) && o.length === 1))
-					return { teamCount, onlySingleTeams }
-				}
-				function layoutResize() {
-					if (!gameboard || gameboard.offsetWidth === 0) {
-						setTimeout(layoutResize, 100)
-						return
-					}
-					gameboard.parentElement.style.margin = ''
-					gameboard.style.zoom = '1'
-					const bodyMargin = parseFloat(getComputedStyle(document.body).marginTop) +
-						parseFloat(getComputedStyle(document.body).marginBottom)
-					const wrapperHeight = window.innerHeight -
-						parseFloat(getComputedStyle(controller).height) - bodyMargin
-					const wrapperSize = Math.min(gameboard.parentElement.offsetWidth, wrapperHeight)
-					const zoom = wrapperSize / gameboard.offsetWidth
-					const three = _init?.settings?.arena?.threeDimensions
-					gameboard.style.zoom = String(zoom * (three ? 0.5 : 0.9))
-					gameboard.parentElement.style.margin = 'auto'
-				}
-				function rotateArray(array) {
-					let result = []
-					for (let i = array[0].length - 1; 0 <= i; i--) {
-						let row = array.map((e) => e[i])
-						result.push(row)
-					}
-					return result
-				}
-				const layerWrapper = document.getElementById('layer-wrapper')
-				window.onresize = layoutResize
-				function renderArenaState(state) {
-					_tick++
-					if (_shrinkOnTick !== null) {
-						document.getElementById('shrink-counter').textContent = 'Moves until next shrink: ' + (_shrinkOnTick - (_tick % _shrinkOnTick) - 1)
-					}
-					const { teamCount, onlySingleTeams } = metaFromInit(_init)
-					_responseLock.classList.remove('engaged', 'booting')
-					if (_init.settings.arena.threeDimensions) {
-						gameboard.classList.add('threeDimensions')
-						;['north', 'south', 'east', 'west'].forEach((side) => {
-							let wall = document.createElement('div')
-							wall.id = 'gameboard-wall-' + side
-							wall.classList.add('gameboard-wall')
-							layerWrapper.appendChild(wall)
-						})
-					}
-					state.reverse().forEach((srcLayer) => {
-						while (layerWrapper.firstChild) {
-							layerWrapper.removeChild(layerWrapper.lastChild)
-						}
-						let layer = document.createElement('div')
-						layer.classList.add('layer')
-						if (_init.settings.rules.defeatedWorms === 'Solid') {
-							layer.classList.add('defeatedWorms_Solid')
-						}
-						layerWrapper.appendChild(layer)
-						let gridTemplateColumns = ''
-						rotateArray(srcLayer).forEach((srcColumn, columIndex) => {
-							gridTemplateColumns += 'auto '
-							srcColumn.forEach((spaceData, rowIndex) => {
-								let space = document.createElement('div')
-								space.classList.add('space')
-								if (rowIndex === 0) {
-									space.classList.add('space-border-left')
-								}
-								if (columIndex === _init.settings.arena.size - 1) {
-									space.classList.add('space-border-bottom')
-								}
-								spaceData.grave.forEach((part) => {
-									let spaceContent = document.createElement('div')
-									spaceContent.classList.add('space-content')
-									spaceContent.classList.add('type-Grave')
-									spaceContent.classList.add('type-' + part.type)
-									spaceContent.innerHTML = part.team
-									spaceContent.style.color = teamRgbHex(part.team, teamCount, onlySingleTeams)
-									space.appendChild(spaceContent)
-								})
-								if (spaceData.occupiedBy !== null) {
-									space.classList.add('type-' + spaceData.occupiedBy.type)
-									if (spaceData.occupiedBy.type !== 'Wall') {
-										let spaceContent = document.createElement('div')
-										spaceContent.classList.add('space-content')
-										spaceContent.innerHTML = spaceData.occupiedBy.team + 1
-										spaceContent.classList.add('worm')
-										spaceContent.style.color = teamRgbHex(spaceData.occupiedBy.team, teamCount, onlySingleTeams)
-										space.appendChild(spaceContent)
-									}
-								}
-								if (spaceData.eatables.apple || 0 < spaceData.eatables.other) {
-									let spaceContent = document.createElement('div')
-									spaceContent.classList.add('space-content')
-									spaceContent.classList.add('eatable')
-									if (spaceData.eatables.apple) {
-										spaceContent.innerHTML = '🍎'
-									} else {
-										spaceContent.innerHTML = spaceData.eatables.other
-										spaceContent.style.fontStyle = 'italic'
-									}
-									space.appendChild(spaceContent)
-								}
-								layer.appendChild(space)
-							})
-						})
-						layer.style.gridTemplateColumns = gridTemplateColumns.trim()
-					})
-					;(() => {
-						let lastSize = null
-						function place() {
-							let layers = layerWrapper.getElementsByClassName('layer')
-							let size = layers[0].offsetHeight
-							if (size !== lastSize && 0 < size) {
-								lastSize = size
-								;[...layers].forEach((layer, index) => {
-									if (0 < index) {
-										layer.style.marginTop = -size + 'px'
-									}
-									let translate = -(size / (_init.settings.arena.size - 1)) * index
-									translate += size / 2
-									layer.style.transform = 'translateZ(' + translate + 'px)'
-								})
-								if (_init.settings.arena.threeDimensions) {
-									let translate = -size / 2
-									;[
-										{
-											side: 'north',
-											style: [
-												{ key: 'height', value: size + 'px' },
-												{ key: 'width', value: size + 'px' },
-												{ key: 'transform', value: 'rotateX(-90deg) translateZ(' + translate + 'px)' },
-											],
-										},
-										{
-											side: 'south',
-											style: [
-												{ key: 'height', value: size + 'px' },
-												{ key: 'width', value: size + 'px' },
-												{ key: 'transform', value: 'rotateX(90deg) translateZ(' + translate + 'px)' },
-											],
-										},
-										{
-											side: 'east',
-											style: [
-												{ key: 'height', value: size + 'px' },
-												{ key: 'width', value: size + 'px' },
-												{ key: 'transform', value: 'rotateX(90deg) rotateY(-90deg) translateZ(' + translate + 'px)' },
-											],
-										},
-										{
-											side: 'west',
-											style: [
-												{ key: 'height', value: size + 'px' },
-												{ key: 'width', value: size + 'px' },
-												{ key: 'transform', value: 'rotateX(90deg) rotateY(90deg) translateZ(' + translate + 'px)' },
-											],
-										},
-									].forEach((w) => {
-										let wall = document.getElementById('gameboard-wall-' + w.side)
-										w.style.forEach((style) => {
-											wall.style[style.key] = style.value
-										})
-									})
-								}
-							}
-							requestAnimationFrame(place)
-						}
-						place()
-					})()
-					queueMicrotask(layoutResize)
-				}
-				InterfaceHelper.onInit((init, workerAdded) => {
-					_init = init
-					if (_init.settings?.border?.noOuterBorder && gameboardWrapper) {
-						gameboardWrapper.classList.add('wrapped')
-					}
-					const shrinkSetting = _init.settings.rules.apples === 'AppleLess' ? -1 : _init.settings.border.movesPerArenaShrink
-					if (shrinkSetting < 0) {
-						_shrinkOnTick = null
-					} else if (shrinkSetting === 0) {
-						_shrinkOnTick = _init.settings.arena.size
-					} else {
-						_shrinkOnTick = _init.settings.border.movesPerArenaShrink
-					}
-					workerAdded((worker) => {
-						humanWorker = worker
-						worker.onMessage = (message) => {
-							renderArenaState(message.data)
-						}
-					})
-				})
-				InterfaceHelper.signalReady()
+				return '#' + toHex(R) + toHex(G) + toHex(B)
 			}
-			function buttonPressed(direction) {
-				if (!humanWorker || _responseLock.classList.contains('engaged')) {
+			function teamRgbHex(teamIndex, teamCount, onlySingleTeams) {
+				let idx = teamIndex
+				let total = teamCount
+				if (idx === 1 && total === 2 && onlySingleTeams) {
+					idx = 1
+					total = 3
+				}
+				return hslIndexToRgbHex(idx, total)
+			}
+			function metaFromInit(init) {
+				const opponents = init?.opponents
+				const teamCount = Array.isArray(opponents) && opponents.length > 0 ? opponents.length : 2
+				const onlySingleTeams = Array.isArray(opponents) &&
+					opponents.every((o) => o === null || (Array.isArray(o) && o.length === 1))
+				return { teamCount, onlySingleTeams }
+			}
+			function layoutResize() {
+				if (!gameboard || gameboard.offsetWidth === 0) {
+					setTimeout(layoutResize, 100)
 					return
 				}
-				_responseLock.classList.add('engaged')
-				const label = _responseLock.querySelector('span')
-				if (label) label.textContent = 'Awaiting update'
-				const value = direction.split(' ')[0]
-				humanWorker.respond(value, {
-					executionSteps: { toRespond: 0, toTerminate: 0 },
-				})
+				gameboard.parentElement.style.margin = ''
+				gameboard.style.zoom = '1'
+				const bodyMargin = parseFloat(getComputedStyle(document.body).marginTop) +
+					parseFloat(getComputedStyle(document.body).marginBottom)
+				const wrapperHeight = window.innerHeight -
+					parseFloat(getComputedStyle(controller).height) - bodyMargin
+				const wrapperSize = Math.min(gameboard.parentElement.offsetWidth, wrapperHeight)
+				const zoom = wrapperSize / gameboard.offsetWidth
+				const three = _init?.settings?.arena?.threeDimensions
+				gameboard.style.zoom = String(zoom * (three ? 0.5 : 0.9))
+				gameboard.parentElement.style.margin = 'auto'
 			}
-			document.addEventListener('keydown', (keyboardEvent) => {
-				if (!_init?.settings?.arena) return
-				switch (keyboardEvent.key) {
-					case 'w':
-					case 'ArrowUp':
-						buttonPressed('y+')
-						break
-					case 's':
-					case 'ArrowDown':
-						buttonPressed('y-')
-						break
-					case 'd':
-					case 'ArrowRight':
-						buttonPressed('x+')
-						break
-					case 'a':
-					case 'ArrowLeft':
-						buttonPressed('x-')
-						break
-					case 'q':
-						if (_init.settings.arena.threeDimensions) {
-							buttonPressed('z+')
-						}
-						break
-					case 'z':
-					case 'e':
-						if (_init.settings.arena.threeDimensions) {
-							buttonPressed('z-')
-						}
-						break
+			function rotateArray(array) {
+				let result = []
+				for (let i = array[0].length - 1; 0 <= i; i--) {
+					let row = array.map((e) => e[i])
+					result.push(row)
 				}
+				return result
+			}
+			const layerWrapper = document.getElementById('layer-wrapper')
+			window.onresize = layoutResize
+			function renderArenaState(state) {
+				_tick++
+				if (_shrinkOnTick !== null) {
+					document.getElementById('shrink-counter').textContent = 'Moves until next shrink: ' + (_shrinkOnTick - (_tick % _shrinkOnTick) - 1)
+				}
+				const { teamCount, onlySingleTeams } = metaFromInit(_init)
+				_responseLock.classList.remove('engaged', 'booting')
+				if (_init.settings.arena.threeDimensions) {
+					gameboard.classList.add('threeDimensions')
+					;['north', 'south', 'east', 'west'].forEach((side) => {
+						let wall = document.createElement('div')
+						wall.id = 'gameboard-wall-' + side
+						wall.classList.add('gameboard-wall')
+						layerWrapper.appendChild(wall)
+					})
+				}
+				state.reverse().forEach((srcLayer) => {
+					while (layerWrapper.firstChild) {
+						layerWrapper.removeChild(layerWrapper.lastChild)
+					}
+					let layer = document.createElement('div')
+					layer.classList.add('layer')
+					if (_init.settings.rules.defeatedWorms === 'Solid') {
+						layer.classList.add('defeatedWorms_Solid')
+					}
+					layerWrapper.appendChild(layer)
+					let gridTemplateColumns = ''
+					rotateArray(srcLayer).forEach((srcColumn, columIndex) => {
+						gridTemplateColumns += 'auto '
+						srcColumn.forEach((spaceData, rowIndex) => {
+							let space = document.createElement('div')
+							space.classList.add('space')
+							if (rowIndex === 0) {
+								space.classList.add('space-border-left')
+							}
+							if (columIndex === _init.settings.arena.size - 1) {
+								space.classList.add('space-border-bottom')
+							}
+							spaceData.grave.forEach((part) => {
+								let spaceContent = document.createElement('div')
+								spaceContent.classList.add('space-content')
+								spaceContent.classList.add('type-Grave')
+								spaceContent.classList.add('type-' + part.type)
+								spaceContent.innerHTML = part.team
+								spaceContent.style.color = teamRgbHex(part.team, teamCount, onlySingleTeams)
+								space.appendChild(spaceContent)
+							})
+							if (spaceData.occupiedBy !== null) {
+								space.classList.add('type-' + spaceData.occupiedBy.type)
+								if (spaceData.occupiedBy.type !== 'Wall') {
+									let spaceContent = document.createElement('div')
+									spaceContent.classList.add('space-content')
+									spaceContent.innerHTML = spaceData.occupiedBy.team + 1
+									spaceContent.classList.add('worm')
+									spaceContent.style.color = teamRgbHex(spaceData.occupiedBy.team, teamCount, onlySingleTeams)
+									space.appendChild(spaceContent)
+								}
+							}
+							if (spaceData.eatables.apple || 0 < spaceData.eatables.other) {
+								let spaceContent = document.createElement('div')
+								spaceContent.classList.add('space-content')
+								spaceContent.classList.add('eatable')
+								if (spaceData.eatables.apple) {
+									spaceContent.innerHTML = '🍎'
+								} else {
+									spaceContent.innerHTML = spaceData.eatables.other
+									spaceContent.style.fontStyle = 'italic'
+								}
+								space.appendChild(spaceContent)
+							}
+							layer.appendChild(space)
+						})
+					})
+					layer.style.gridTemplateColumns = gridTemplateColumns.trim()
+				})
+				;(() => {
+					let lastSize = null
+					function place() {
+						let layers = layerWrapper.getElementsByClassName('layer')
+						let size = layers[0].offsetHeight
+						if (size !== lastSize && 0 < size) {
+							lastSize = size
+							;[...layers].forEach((layer, index) => {
+								if (0 < index) {
+									layer.style.marginTop = -size + 'px'
+								}
+								let translate = -(size / (_init.settings.arena.size - 1)) * index
+								translate += size / 2
+								layer.style.transform = 'translateZ(' + translate + 'px)'
+							})
+							if (_init.settings.arena.threeDimensions) {
+								let translate = -size / 2
+								;[
+									{
+										side: 'north',
+										style: [
+											{ key: 'height', value: size + 'px' },
+											{ key: 'width', value: size + 'px' },
+											{ key: 'transform', value: 'rotateX(-90deg) translateZ(' + translate + 'px)' },
+										],
+									},
+									{
+										side: 'south',
+										style: [
+											{ key: 'height', value: size + 'px' },
+											{ key: 'width', value: size + 'px' },
+											{ key: 'transform', value: 'rotateX(90deg) translateZ(' + translate + 'px)' },
+										],
+									},
+									{
+										side: 'east',
+										style: [
+											{ key: 'height', value: size + 'px' },
+											{ key: 'width', value: size + 'px' },
+											{ key: 'transform', value: 'rotateX(90deg) rotateY(-90deg) translateZ(' + translate + 'px)' },
+										],
+									},
+									{
+										side: 'west',
+										style: [
+											{ key: 'height', value: size + 'px' },
+											{ key: 'width', value: size + 'px' },
+											{ key: 'transform', value: 'rotateX(90deg) rotateY(90deg) translateZ(' + translate + 'px)' },
+										],
+									},
+								].forEach((w) => {
+									let wall = document.getElementById('gameboard-wall-' + w.side)
+									w.style.forEach((style) => {
+										wall.style[style.key] = style.value
+									})
+								})
+							}
+						}
+						requestAnimationFrame(place)
+					}
+					place()
+				})()
+				queueMicrotask(layoutResize)
+			}
+			InterfaceHelper.onInit((init, workerAdded) => {
+				_init = init
+				if (_init.settings?.border?.noOuterBorder && gameboardWrapper) {
+					gameboardWrapper.classList.add('wrapped')
+				}
+				const shrinkSetting = _init.settings.rules.apples === 'AppleLess' ? -1 : _init.settings.border.movesPerArenaShrink
+				if (shrinkSetting < 0) {
+					_shrinkOnTick = null
+				} else if (shrinkSetting === 0) {
+					_shrinkOnTick = _init.settings.arena.size
+				} else {
+					_shrinkOnTick = _init.settings.border.movesPerArenaShrink
+				}
+				workerAdded((worker) => {
+					humanWorker = worker
+					worker.onMessage = (message) => {
+						renderArenaState(message.data)
+					}
+				})
 			})
+			InterfaceHelper.signalReady()
+		}
+		function buttonPressed(direction) {
+			if (!humanWorker || _responseLock.classList.contains('engaged')) {
+				return
+			}
+			_responseLock.classList.add('engaged')
+			const label = _responseLock.querySelector('span')
+			if (label) label.textContent = 'Awaiting update'
+			const value = direction.split(' ')[0]
+			humanWorker.respond(value, {
+				executionSteps: { toRespond: 0, toTerminate: 0 },
+			})
+		}
+		document.addEventListener('keydown', (keyboardEvent) => {
+			if (!_init?.settings?.arena) return
+			switch (keyboardEvent.key) {
+				case 'w':
+				case 'ArrowUp':
+					buttonPressed('y+')
+					break
+				case 's':
+				case 'ArrowDown':
+					buttonPressed('y-')
+					break
+				case 'd':
+				case 'ArrowRight':
+					buttonPressed('x+')
+					break
+				case 'a':
+				case 'ArrowLeft':
+					buttonPressed('x-')
+					break
+				case 'q':
+					if (_init.settings.arena.threeDimensions) {
+						buttonPressed('z+')
+					}
+					break
+				case 'z':
+				case 'e':
+					if (_init.settings.arena.threeDimensions) {
+						buttonPressed('z-')
+					}
+					break
+			}
+		})
 		</script>
 	</head>
 	<body onload="a()">
